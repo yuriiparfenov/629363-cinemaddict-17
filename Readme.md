@@ -1,7 +1,7 @@
 # Проект «Киноман»
 
 * Студент: [Юрий Парфенов](https://up.htmlacademy.ru/ecmascript/17/user/629363).
-* Наставник: `Неизвестно`.
+* Наставник: [Алексей Беляев](https://htmlacademy.ru/profile/id691043).
 
 ---
 
