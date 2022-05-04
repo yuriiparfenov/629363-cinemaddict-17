@@ -1,0 +1,7 @@
+const FILMS_MAIN_COUNT = 5;
+const START_NUMBER_ARRAY = 0;
+const DOUBLE_REPEAT = 2;
+const TOP_RATED = 'Top rated';
+const MOST_COMMENTED = 'Most commented';
+
+export { DOUBLE_REPEAT, FILMS_MAIN_COUNT, START_NUMBER_ARRAY, TOP_RATED, MOST_COMMENTED };
