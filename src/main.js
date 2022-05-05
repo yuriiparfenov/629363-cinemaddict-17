@@ -9,7 +9,7 @@ const siteMainElement = document.querySelector('.main');
 const siteFooterElement = document.querySelector('.footer__statistics');
 const mainPresenter = new MainPresenter();
 const filmsModel = new FilmsModel();
-const comments = filmsModel.getComments();
+filmsModel.getComments();
 const films = filmsModel.getFilms();
 
 render(new ProfileRatingView(), siteHeaderElement);
