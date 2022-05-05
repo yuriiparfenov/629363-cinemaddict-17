@@ -20,34 +20,36 @@ export default class MainPresenter {
   filmsListCommentedContainer = new FilmsListContainerView();
 
 
-  init = (element) => {
+  init = (element, films) => {
     this.element = element;
+    this.films = films;
 
-    render(new NavigationView(), this.element);
+    render(new NavigationView(films), this.element);
     render(new SortingView(), this.element);
     render(this.filmsListMainContainer, this.element);
     render(this.filmsList, this.filmsListMainContainer.getElement());
     render(this.filmsListContainer, this.filmsList.getElement());
 
-    for (let i = START_NUMBER_ARRAY; i < FILMS_MAIN_COUNT; i++) {
-      render(new FilmsCardView(), this.filmsListContainer.getElement());
-    }
+    films.slice(START_NUMBER_ARRAY, FILMS_MAIN_COUNT)
+      .map((film) => render(new FilmsCardView(film), this.filmsListContainer.getElement()));
+
 
     render(new ShowMoreButtonView(), this.filmsList.getElement());
+    const sortFilmsByRating = films.sort((prevElem, nextElem) => nextElem.filmInfo.totalRating - prevElem.filmInfo.totalRating);
 
     render(this.filmsListExtraRated, this.filmsListMainContainer.getElement());
     render(this.filmsListRatedContainer, this.filmsListExtraRated.getElement());
 
-    for (let i = START_NUMBER_ARRAY; i < DOUBLE_REPEAT; i++) {
-      render(new FilmsCardView(), this.filmsListRatedContainer.getElement());
-    }
+    sortFilmsByRating.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
+      .map((film) => render(new FilmsCardView(film), this.filmsListRatedContainer.getElement()));
 
     render(this.filmsListExtraCommented, this.filmsListMainContainer.getElement());
     render(this.filmsListCommentedContainer, this.filmsListExtraCommented.getElement());
 
-    for (let i = START_NUMBER_ARRAY; i < DOUBLE_REPEAT; i++) {
-      render(new FilmsCardView(), this.filmsListCommentedContainer.getElement());
-    }
+    const sortFilmsByComments = films.sort((prevElem, nextElem) => nextElem.comments.length - prevElem.comments.length);
+
+    sortFilmsByComments.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
+      .map((film) => render(new FilmsCardView(film), this.filmsListCommentedContainer.getElement()));
 
   };
 }
