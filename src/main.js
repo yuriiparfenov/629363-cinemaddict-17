@@ -9,10 +9,10 @@ const siteMainElement = document.querySelector('.main');
 const siteFooterElement = document.querySelector('.footer__statistics');
 const mainPresenter = new MainPresenter();
 const filmsModel = new FilmsModel();
-filmsModel.getComments();
-const films = filmsModel.getFilms();
+const comments = filmsModel.comments;
+const films = filmsModel.films;
 
 render(new ProfileRatingView(), siteHeaderElement);
-mainPresenter.init(siteMainElement, films);
+mainPresenter.init(siteMainElement, films, comments);
 render(new FooterStatisticsView, siteFooterElement);
 
