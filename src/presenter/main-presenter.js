@@ -9,7 +9,8 @@ import FilmsCardView from '../view/film-card';
 import TopRatedFilmsView from '../view/top-rated-films';
 import MostCommentedFilmsView from '../view/most-commented-films';
 import PopupContainerView from '../view/popup-container';
-import { START_NUMBER_ARRAY, FILMS_MAIN_COUNT, DOUBLE_REPEAT } from '../const';
+import FilmsEmptyView from '../view/films-empty';
+import { START_NUMBER_ARRAY, DOUBLE_REPEAT, N_REPEAT } from '../const';
 
 export default class MainPresenter {
   filmsListMainContainer = new FilmsMainContainerView();
@@ -19,6 +20,7 @@ export default class MainPresenter {
   filmsListRatedContainer = new FilmsListContainerView();
   filmsListExtraCommented = new MostCommentedFilmsView();
   filmsListCommentedContainer = new FilmsListContainerView();
+  #showButton = new ShowMoreButtonView();
   #element = null;
   #films = null;
 
@@ -32,6 +34,8 @@ export default class MainPresenter {
     render(this.filmsListMainContainer, this.#element);
     render(this.filmsList, this.filmsListMainContainer.element);
     render(this.filmsListContainer, this.filmsList.element);
+
+    let firstFilmsShowCount = N_REPEAT;
 
     const renderFilm = (filmListContainerElement, film) => {
       const filmElement = new FilmsCardView(film);
@@ -71,10 +75,31 @@ export default class MainPresenter {
       });
     };
 
-    this.#films.slice(START_NUMBER_ARRAY, FILMS_MAIN_COUNT)
-      .map((film) => renderFilm(this.filmsListContainer.element, film));
 
-    render(new ShowMoreButtonView(), this.filmsList.element);
+    if (!this.#films.length) {
+      render(new FilmsEmptyView(), this.filmsList.element);
+    } else {
+
+      this.#films.slice(START_NUMBER_ARRAY, firstFilmsShowCount)
+        .map((film) => renderFilm(this.filmsListContainer.element, film));
+
+      render(this.#showButton, this.filmsList.element);
+
+
+      this.#showButton.element.addEventListener('click', () => {
+        const prevFilmsCount = firstFilmsShowCount;
+        firstFilmsShowCount = prevFilmsCount + N_REPEAT;
+
+        this.#films.slice(prevFilmsCount, firstFilmsShowCount)
+          .map((film) => renderFilm(this.filmsListContainer.element, film));
+        render(this.#showButton, this.filmsList.element);
+
+        if (firstFilmsShowCount >= films.length) {
+          this.filmsList.element.removeChild(this.#showButton.element);
+        }
+      });
+    }
+
     const sortFilmsByRating = this.#films.sort((prevElem, nextElem) => nextElem.filmInfo.totalRating - prevElem.filmInfo.totalRating);
 
     render(this.filmsListExtraRated, this.filmsListMainContainer.element);
