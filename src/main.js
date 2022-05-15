@@ -1,5 +1,5 @@
 import MainPresenter from './presenter/main-presenter';
-import { render } from './render';
+import { render } from './framework/render';
 import ProfileRatingView from './view/profile-rating';
 import FooterStatisticsView from './view/footer-statistics';
 import FilmsModel from './model/films-model';

@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view';
 
 const createNavigationTemplate = (films) => {
   const watchlistSortFilms = films.filter(({ userDetails }) => userDetails.watchList === true);
@@ -14,27 +14,15 @@ const createNavigationTemplate = (films) => {
 </nav>`);
 };
 
-export default class NavigationView {
-  #element = null;
+export default class NavigationView extends AbstractView {
   #films = null;
 
   constructor(films) {
+    super();
     this.#films = films;
   }
 
   get template() {
     return createNavigationTemplate(this.#films);
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }
