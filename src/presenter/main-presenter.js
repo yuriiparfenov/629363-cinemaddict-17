@@ -1,4 +1,4 @@
-import { render } from '../render';
+import { render } from '../framework/render';
 import NavigationView from '../view/navigation';
 import SortingView from '../view/sorting';
 import FilmsMainContainerView from '../view/films-main-container';
@@ -62,13 +62,13 @@ export default class MainPresenter {
         render(popUpElement, document.body);
       };
 
-      filmElement.element.addEventListener('click', () => {
+      filmElement.setClickHandler(() => {
         showPopup();
         document.body.classList.add('hide-overflow');
         document.addEventListener('keydown', onEscClose);
       });
 
-      popUpElement.element.querySelector('.film-details__close-btn').addEventListener('click', () => {
+      popUpElement.setClickHandler(() => {
         closePopup();
         document.removeEventListener('keydown', onEscClose);
         document.body.classList.remove('hide-overflow');
@@ -86,7 +86,7 @@ export default class MainPresenter {
       render(this.#showButton, this.filmsList.element);
 
 
-      this.#showButton.element.addEventListener('click', () => {
+      this.#showButton.setClickHandler(() => {
         const prevFilmsCount = firstFilmsShowCount;
         firstFilmsShowCount = prevFilmsCount + N_REPEAT;
 
