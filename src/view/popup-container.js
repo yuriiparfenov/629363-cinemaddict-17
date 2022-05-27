@@ -182,13 +182,43 @@ export default class PopupContainerView extends AbstractView {
     return createPopupContainerTemplate(this.#film);
   }
 
-  setClickHandler = (callback) => {
+  setCloseClickHandler = (callback) => {
     this._callback.click = callback;
     this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#clickHandler);
+  };
+
+  setFavoriteClickHandler = (callback) => {
+    this._callback.favoriteClick = callback;
+    this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
+  };
+
+  setHistoryClickHandler = (callback) => {
+    this._callback.whatchedClick = callback;
+    this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#whatchedClickHandler);
+  };
+
+  setWhatchlistClickHandler = (callback) => {
+    this._callback.addToWatchClick = callback;
+    this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#addToWatchClickHandler);
   };
 
   #clickHandler = (evt) => {
     evt.preventDefault();
     this._callback.click();
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.stopPropagation();
+    this._callback.favoriteClick();
+  };
+
+  #whatchedClickHandler = (evt) => {
+    evt.stopPropagation();
+    this._callback.whatchedClick();
+  };
+
+  #addToWatchClickHandler = (evt) => {
+    evt.stopPropagation();
+    this._callback.addToWatchClick();
   };
 }

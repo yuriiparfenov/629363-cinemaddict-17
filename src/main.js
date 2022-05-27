@@ -7,12 +7,12 @@ import FilmsModel from './model/films-model';
 const siteHeaderElement = document.querySelector('.header');
 const siteMainElement = document.querySelector('.main');
 const siteFooterElement = document.querySelector('.footer__statistics');
-const mainPresenter = new MainPresenter();
+const mainPresenter = new MainPresenter(siteMainElement);
 const filmsModel = new FilmsModel();
 const comments = filmsModel.comments;
 const films = filmsModel.films;
 
 render(new ProfileRatingView(), siteHeaderElement);
-mainPresenter.init(siteMainElement, films, comments);
+mainPresenter.init(films, comments);
 render(new FooterStatisticsView, siteFooterElement);
 
