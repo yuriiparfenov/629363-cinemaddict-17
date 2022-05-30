@@ -54,14 +54,16 @@ export default class MainPresenter {
       return;
     }
 
-    this.#sortedFilms(sortType);
-    this.#clearFilmsList();
-    this.#renderFilmsList();
+    this.#sortedFilms(sortType); //сортировка по типу
+    this.#clearFilmsList(); //очистка отображения списка фильмов
+    this.#renderFilmsList(); //рендер фильмов по сортировке
 
-    this.#renderSortMenu();
-    this.#renderSortFilmsByRating();
-    this.#renderSortFilmsByComments();
+    this.#renderSortMenu(); // рендер меню сортировки
+    this.#renderSortFilmsByRating(); //рендер 2 самых рейтинговых фильмов
+    this.#renderSortFilmsByComments(); // рендер 2 самых комментированных фильмов
   };
+
+  //рендер меню сортировки
 
   #renderSortMenu = () => {
     const prevSortElem = this.#sortFilms;
@@ -80,6 +82,8 @@ export default class MainPresenter {
 
     remove(prevSortElem);
   };
+
+  //сортировка по типу
 
   #sortedFilms = (sortType) => {
     switch (sortType) {
@@ -148,6 +152,8 @@ export default class MainPresenter {
     sortFilmsByComments.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
       .map((film) => this.#renderFilm(this.filmsListCommentedContainer.element, film));
   };
+
+  //очистка списка фильмов
 
   #clearFilmsList = () => {
     this.#filmPresenter.forEach((presenter) => presenter.destroy());
