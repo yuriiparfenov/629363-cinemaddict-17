@@ -1,4 +1,4 @@
-import { remove, render } from '../framework/render';
+import { remove, render, replace } from '../framework/render';
 import NavigationView from '../view/navigation';
 import SortingView from '../view/sorting';
 import FilmsMainContainerView from '../view/films-main-container';
@@ -8,9 +8,9 @@ import ShowMoreButtonView from '../view/show-more-button';
 import TopRatedFilmsView from '../view/top-rated-films';
 import MostCommentedFilmsView from '../view/most-commented-films';
 import FilmsEmptyView from '../view/films-empty';
-import { START_NUMBER_ARRAY, DOUBLE_REPEAT, N_REPEAT } from '../const';
+import { START_NUMBER_ARRAY, DOUBLE_REPEAT, N_REPEAT, SORT_TYPE } from '../const';
 import FilmCardPresenter from './film-card-presenter';
-import { updateFilm } from '../utils';
+import { compareDates, compareRatings, updateFilm } from '../utils';
 
 export default class MainPresenter {
   filmsListMainContainer = new FilmsMainContainerView();
@@ -20,12 +20,16 @@ export default class MainPresenter {
   filmsListRatedContainer = new FilmsListContainerView();
   filmsListExtraCommented = new MostCommentedFilmsView();
   filmsListCommentedContainer = new FilmsListContainerView();
+  #sortFilms = null;
   #showButton = new ShowMoreButtonView();
   #element = null;
   #films = null;
   #filmPresenter = new Map();
   #renderedFilmCount = N_REPEAT;
   #filmListArray = [];
+  #sortedFilmsBy = [];
+  #currentSortType = SORT_TYPE.DEFAULT;
+  #sourcedFilmsArray = [];
 
   constructor(element) {
     this.#element = element;
@@ -37,12 +41,58 @@ export default class MainPresenter {
     this.#filmPresenter.set(film.id, filmPresenter);
   };
 
-  #renderAllFilmsContainres = () => {
+  #renderAllFilmsContainers = () => {
     render(new NavigationView(this.#filmListArray), this.#element);
-    render(new SortingView(), this.#element);
+    this.#renderSortMenu();
     render(this.filmsListMainContainer, this.#element);
     render(this.filmsList, this.filmsListMainContainer.element);
     render(this.filmsListContainer, this.filmsList.element);
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortedFilms(sortType);
+    this.#clearFilmsList();
+    this.#renderFilmsList();
+
+    this.#renderSortMenu();
+    this.#renderSortFilmsByRating();
+    this.#renderSortFilmsByComments();
+  };
+
+  #renderSortMenu = () => {
+    const prevSortElem = this.#sortFilms;
+    this.#sortFilms = new SortingView();
+
+    if (prevSortElem === null) {
+      render(this.#sortFilms, this.#element);
+      this.#sortFilms.setSortTypeChangeHandler(this.#handleSortTypeChange);
+      return;
+    }
+
+    if (this.#element.contains(prevSortElem.element)) {
+      replace(this.#sortFilms, prevSortElem);
+      this.#sortFilms.setSortTypeChangeHandler(this.#handleSortTypeChange);
+    }
+
+    remove(prevSortElem);
+  };
+
+  #sortedFilms = (sortType) => {
+    switch (sortType) {
+      case 'RATING':
+        this.#filmListArray.sort(compareRatings);
+        break;
+      case 'DATE':
+        this.#filmListArray.sort(compareDates);
+        break;
+      default:
+        this.#filmListArray = [...this.#sourcedFilmsArray];
+    }
+    this.#currentSortType = sortType;
   };
 
   #renderFilmsList = () => {
@@ -80,10 +130,10 @@ export default class MainPresenter {
   };
 
   #renderSortFilmsByRating = () => {
-    const sortFilmsByRating = this.#filmListArray.sort((prevElem, nextElem) => nextElem.filmInfo.totalRating - prevElem.filmInfo.totalRating);
-
     render(this.filmsListExtraRated, this.filmsListMainContainer.element);
     render(this.filmsListRatedContainer, this.filmsListExtraRated.element);
+
+    const sortFilmsByRating = this.#sortedFilmsBy.sort(compareRatings);
 
     sortFilmsByRating.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
       .map((film) => this.#renderFilm(this.filmsListRatedContainer.element, film));
@@ -93,7 +143,7 @@ export default class MainPresenter {
     render(this.filmsListExtraCommented, this.filmsListMainContainer.element);
     render(this.filmsListCommentedContainer, this.filmsListExtraCommented.element);
 
-    const sortFilmsByComments = this.#filmListArray.sort((prevElem, nextElem) => nextElem.comments.length - prevElem.comments.length);
+    const sortFilmsByComments = this.#sortedFilmsBy.sort((prevElem, nextElem) => nextElem.comments.length - prevElem.comments.length);
 
     sortFilmsByComments.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
       .map((film) => this.#renderFilm(this.filmsListCommentedContainer.element, film));
@@ -108,6 +158,7 @@ export default class MainPresenter {
 
   #handleFilmChange = (updatedFilmItem) => {
     this.#filmListArray = updateFilm(this.#filmListArray, updatedFilmItem);
+    this.#sourcedFilmsArray = updateFilm(this.#sourcedFilmsArray, updatedFilmItem);
     this.#filmPresenter.get(updatedFilmItem.id).init(updatedFilmItem);
   };
 
@@ -117,8 +168,10 @@ export default class MainPresenter {
 
   init = (films) => {
     this.#filmListArray = [...films];
+    this.#sourcedFilmsArray = [...films];
+    this.#sortedFilmsBy = [...films];
 
-    this.#renderAllFilmsContainres(); //render всех контейнеров для списка фильмов
+    this.#renderAllFilmsContainers(); //render всех контейнеров для списка фильмов
     this.#renderFilmsList(); //render самого списка фильмов
     this.#renderSortFilmsByRating(); //render 2-х самых рейтинговых фильмов
     this.#renderSortFilmsByComments(); //render 2-х самых комментируемых фильмво
