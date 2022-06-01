@@ -11,6 +11,7 @@ import FilmsEmptyView from '../view/films-empty';
 import { START_NUMBER_ARRAY, DOUBLE_REPEAT, N_REPEAT, SORT_TYPE } from '../const';
 import FilmCardPresenter from './film-card-presenter';
 import { compareDates, compareRatings, updateFilm } from '../utils';
+import { nanoid } from 'nanoid';
 
 export default class MainPresenter {
   filmsListMainContainer = new FilmsMainContainerView();
@@ -38,7 +39,8 @@ export default class MainPresenter {
   #renderFilm = (container, film) => {
     const filmPresenter = new FilmCardPresenter(container, this.#handleFilmChange, this.#handleModeChange);
     filmPresenter.init(film);
-    this.#filmPresenter.set(film.id, filmPresenter);
+    const filmId = nanoid();
+    this.#filmPresenter.set(filmId, filmPresenter);
   };
 
   #renderAllFilmsContainers = () => {
@@ -165,7 +167,7 @@ export default class MainPresenter {
   #handleFilmChange = (updatedFilmItem) => {
     this.#filmListArray = updateFilm(this.#filmListArray, updatedFilmItem);
     this.#sourcedFilmsArray = updateFilm(this.#sourcedFilmsArray, updatedFilmItem);
-    this.#filmPresenter.get(updatedFilmItem.id).init(updatedFilmItem);
+    this.#filmPresenter.get(updatedFilmItem.filmId).init(updatedFilmItem);
   };
 
   #handleModeChange = () => {
