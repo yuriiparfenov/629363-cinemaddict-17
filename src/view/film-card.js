@@ -1,7 +1,9 @@
 import AbstractView from '../framework/view/abstract-view';
 
-const createFilmsCardTemplate = (film) => {
+const createFilmsCardTemplate = (film, filmComments) => {
   const { title, totalRating, year, duration, genre, poster, description } = film.filmInfo;
+  const { watchList, alreadyWatched, favorite } = film.userDetails;
+  const commentsArray = filmComments.filter((elem) => (film.comments.includes(elem.id)));
   return (
     `<article class="film-card">
         <a class="film-card__link">
@@ -14,26 +16,28 @@ const createFilmsCardTemplate = (film) => {
           </p>
           <img src="./images/posters/${poster}" alt="${title}" class="film-card__poster">
           <p class="film-card__description">${description}</p>
-          <span class="film-card__comments">${film.comments.length} comments</span>
+          <span class="film-card__comments">${commentsArray.length} comments</span>
         </a>
         <div class="film-card__controls">
-          <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-          <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-          <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
+          <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${watchList && 'film-card__controls-item--active'}" type="button">Add to watchlist</button>
+          <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${alreadyWatched && 'film-card__controls-item--active'}" type="button">Mark as watched</button>
+          <button class="film-card__controls-item film-card__controls-item--favorite ${favorite && 'film-card__controls-item--active'}" type="button">Mark as favorite</button>
         </div>
       </article>`);
 };
 
 export default class FilmsCardView extends AbstractView {
   #film = null;
+  #filmComments = null;
 
-  constructor(film) {
+  constructor(film, filmComments) {
     super();
     this.#film = film;
+    this.#filmComments = filmComments;
   }
 
   get template() {
-    return createFilmsCardTemplate(this.#film);
+    return createFilmsCardTemplate(this.#film, this.#filmComments);
   }
 
   setClickHandler = (callback) => {

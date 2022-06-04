@@ -11,7 +11,7 @@ const descriptions = ['The film opens following a murder', 'at a cabaret in Mexi
 
 const generateFilm = (id, comments) => ({
   id: id,
-  comments: Array.from({ length: getRandomNumber(0, comments.length) }, () => comments.filter((item) => item.id === id)),
+  comments: Array.from({ length: getRandomNumber(0, comments.length) }, () => getRandomNumber(0, 20)),
   filmInfo: {
     title: getRandomArrayItem(titles),
     alternativeTitle: getRandomArrayItem(titles),
