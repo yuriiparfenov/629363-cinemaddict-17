@@ -11,11 +11,13 @@ export default class FilmCardPresenter {
   #changeFilm = null;
   #changeMode = null;
   #popupMode = POPUP_MODE.CLOSED;
+  #filmComments = null;
 
-  constructor(filmListContainerElement, changeFilm, changeMode) {
+  constructor(filmListContainerElement, changeFilm, changeMode, comments) {
     this.#filmListContainerElement = filmListContainerElement;
     this.#changeFilm = changeFilm;
     this.#changeMode = changeMode;
+    this.#filmComments = comments;
   }
 
   init = (film) => {
@@ -24,8 +26,8 @@ export default class FilmCardPresenter {
     const prevFilmElement = this.#filmElement;
     const prevPopUpElement = this.#popUpElement;
 
-    this.#filmElement = new FilmsCardView(film);
-    this.#popUpElement = new PopupContainerView(film);
+    this.#filmElement = new FilmsCardView(film, this.#filmComments);
+    this.#popUpElement = new PopupContainerView(film, this.#filmComments);
 
     this.#filmElement.setClickHandler(this.#clickOpenPopUpHandler);
     this.#filmElement.setFavoriteClickHandler(this.#favoriteFilmHandle);

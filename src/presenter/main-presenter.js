@@ -31,15 +31,17 @@ export default class MainPresenter {
   #sortedFilmsBy = [];
   #currentSortType = SORT_TYPE.DEFAULT;
   #sourcedFilmsArray = [];
+  #filmComments = [];
 
   constructor(element) {
     this.#element = element;
   }
 
   #renderFilm = (container, film) => {
-    const filmPresenter = new FilmCardPresenter(container, this.#handleFilmChange, this.#handleModeChange);
+    const filmPresenter = new FilmCardPresenter(container, this.#handleFilmChange, this.#handleModeChange, this.#filmComments);
     filmPresenter.init(film);
     const filmId = nanoid();
+    film.id = filmId;
     this.#filmPresenter.set(filmId, filmPresenter);
   };
 
@@ -167,17 +169,19 @@ export default class MainPresenter {
   #handleFilmChange = (updatedFilmItem) => {
     this.#filmListArray = updateFilm(this.#filmListArray, updatedFilmItem);
     this.#sourcedFilmsArray = updateFilm(this.#sourcedFilmsArray, updatedFilmItem);
-    this.#filmPresenter.get(updatedFilmItem.filmId).init(updatedFilmItem);
+    this.#filmPresenter.get(updatedFilmItem.id).init(updatedFilmItem);
   };
 
   #handleModeChange = () => {
     this.#filmPresenter.forEach((presenter) => presenter.resetView());
   };
 
-  init = (films) => {
+  init = (films, comments) => {
     this.#filmListArray = [...films];
     this.#sourcedFilmsArray = [...films];
     this.#sortedFilmsBy = [...films];
+    this.#filmComments = comments;
+
 
     this.#renderAllFilmsContainers(); //render всех контейнеров для списка фильмов
     this.#renderFilmsList(); //render самого списка фильмов
