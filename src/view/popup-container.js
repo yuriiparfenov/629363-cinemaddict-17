@@ -1,4 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import { transformDuration, transformReleaseDate } from '../utils';
 
 const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
   <li class="film-details__comment">
@@ -9,7 +10,7 @@ const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
       <p class="film-details__comment-text">${elem.comment}</p>
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${elem.author}</span>
-        <span class="film-details__comment-day">${elem.date}</span>
+        <span class="film-details__comment-day">${transformReleaseDate(elem.date)}</span>
         <button class="film-details__comment-delete">Delete</button>
       </p>
     </div>
@@ -61,11 +62,11 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCom
           </tr>
           <tr class="film-details__row">
             <td class="film-details__term">Release Date</td>
-            <td class="film-details__cell">${release.date}</td>
+            <td class="film-details__cell">${transformReleaseDate(release.date)}</td>
           </tr>
           <tr class="film-details__row">
             <td class="film-details__term">Runtime</td>
-            <td class="film-details__cell">${runtime}</td>
+            <td class="film-details__cell">${transformDuration(runtime)}</td>
           </tr>
           <tr class="film-details__row">
             <td class="film-details__term">Country</td>

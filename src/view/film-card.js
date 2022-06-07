@@ -1,7 +1,8 @@
 import AbstractView from '../framework/view/abstract-view';
+import { transformReleaseYear, transformDuration } from '../utils';
 
 const createFilmsCardTemplate = (film, filmComments) => {
-  const { title, totalRating, year, duration, genre, poster, description } = film.filmInfo;
+  const { title, totalRating, release ,runtime, genre, poster, description } = film.filmInfo;
   const { watchList, alreadyWatched, favorite } = film.userDetails;
   const commentsArray = filmComments.filter((elem) => (film.comments.includes(elem.id)));
   return (
@@ -10,12 +11,12 @@ const createFilmsCardTemplate = (film, filmComments) => {
           <h3 class="film-card__title">${title}</h3>
           <p class="film-card__rating">${totalRating}</p>
           <p class="film-card__info">
-            <span class="film-card__year">${year}</span>
-            <span class="film-card__duration">${duration}</span>
+            <span class="film-card__year">${transformReleaseYear(release.date)}</span>
+            <span class="film-card__duration">${transformDuration(runtime)}</span>
             <span class="film-card__genre">${genre}</span>
           </p>
           <img src="./images/posters/${poster}" alt="${title}" class="film-card__poster">
-          <p class="film-card__description">${description}</p>
+          <p class="film-card__description">${description.length > 140 ? `${description.substr(0, 139)}...` : description}</p>
           <span class="film-card__comments">${commentsArray.length} comments</span>
         </a>
         <div class="film-card__controls">
