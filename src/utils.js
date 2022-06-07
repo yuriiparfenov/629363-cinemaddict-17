@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 
-
 dayjs.extend(duration);
 
 const getRandomNumber = (max, min = 0) => Math.floor((Math.random() * (max - min) + min));

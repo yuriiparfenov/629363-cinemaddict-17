@@ -1,4 +1,4 @@
-import { getRandomArrayItem, getRandomNumber, months } from '../utils';
+import { getRandomArrayItem, getRandomNumber } from '../utils';
 import { FILMS_COUNT } from '../const';
 
 const authors = ['Ilya O\'Reilly', 'Tom', 'Brandon Lee', 'Arny'];
