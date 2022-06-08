@@ -22,13 +22,11 @@ const generateFilm = (id, comments) => ({
     writers: writers.slice(0, getRandomNumber(writers.length, 1)),
     actors: actors.slice(0, getRandomNumber(actors.length, 1)),
     release: {
-      date: `${getRandomNumber(30, 1)} ${getRandomArrayItem(months)} ${getRandomNumber(2000, 1920)}`,
+      date: '2019-05-11T00:00:00.000Z',
       releaseCountry: getRandomArrayItem(countries, 1),
     },
-    runtime: getRandomNumber(200, 50),
     genre: getRandomArrayItem(genres),
-    year: getRandomNumber(2000, 1900),
-    duration: '1h 55m',
+    runtime: getRandomNumber(200, 50),
     description: descriptions.slice(0, getRandomNumber(descriptions.length, 1)).join(' '),
   },
   userDetails: {

@@ -1,4 +1,4 @@
-import { getRandomArrayItem, getRandomNumber, months } from '../utils';
+import { getRandomArrayItem, getRandomNumber } from '../utils';
 import { FILMS_COUNT } from '../const';
 
 const authors = ['Ilya O\'Reilly', 'Tom', 'Brandon Lee', 'Arny'];
@@ -9,7 +9,7 @@ const generateComment = () => ({
   id: getRandomNumber(FILMS_COUNT, 0),
   author: getRandomArrayItem(authors),
   comment: getRandomArrayItem(commentsText),
-  date: `${getRandomNumber(30, 1)} ${getRandomArrayItem(months)} ${getRandomNumber(2022, 2020)}`,
+  date: '2019-05-11T16:12:32.554Z',
   emotion: `./images/emoji/${getRandomArrayItem(emotions)}.png`,
 });
 
