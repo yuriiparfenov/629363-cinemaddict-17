@@ -50,6 +50,7 @@ const replace = (newComponent, oldComponent) => {
 
   const newElement = newComponent.element;
   const oldElement = oldComponent.element;
+  const scrollPosition = oldElement.scrollTop;
 
   const parent = oldElement.parentElement;
 
@@ -58,6 +59,7 @@ const replace = (newComponent, oldComponent) => {
   }
 
   parent.replaceChild(newElement, oldElement);
+  newElement.scrollTop = scrollPosition;
 };
 
 /**

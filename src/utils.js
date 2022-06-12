@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import { FILTER_TYPE } from './const';
 
 dayjs.extend(duration);
 
@@ -28,7 +29,14 @@ const transformReleaseDate = (date) => dayjs(date).format('DD MMMM YYYY');
 const compareRatings = (prevElem, nextElem) => nextElem.filmInfo.totalRating - prevElem.filmInfo.totalRating;
 const compareDates = (prevElem, nextElem) => dayjs(nextElem.filmInfo.release.date) - dayjs(prevElem.filmInfo.release.date);
 
+const filter = {
+  [FILTER_TYPE.ALL]: (films) => films,
+  [FILTER_TYPE.FAVORITE]: (films) => films.filter((film) => film.userDetails.favorite),
+  [FILTER_TYPE.HISTORY]: (films) => films.filter((film) => film.userDetails.alreadyWatched),
+  [FILTER_TYPE.WATCH_LIST]: (films) => films.filter((film) => film.userDetails.watchList),
+};
+
 export {
   getRandomNumber, getRandomArrayItem, months, updateFilm, compareRatings, compareDates, transformReleaseYear,
-  transformDuration, transformReleaseDate
+  transformDuration, transformReleaseDate, filter
 };
