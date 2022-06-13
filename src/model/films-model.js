@@ -1,25 +1,28 @@
-import { generateComments } from '../mock/comments';
+import Observable from '../framework/observable';
 import { generateQuantityFilms } from '../mock/films';
-import { COMMENTS_COUNT, FILMS_COUNT } from '../const';
+import { FILMS_COUNT } from '../const';
 
-export default class FilmsModel {
-  #comments = null;
-  #films = null;
-
-  get comments() {
-    if (!this.#comments) {
-      this.#comments = generateComments(COMMENTS_COUNT);
-    }
-
-    return this.#comments;
-  }
+export default class FilmsModel extends Observable {
+  #films = generateQuantityFilms(FILMS_COUNT);
 
   get films() {
-    if (!this.#films) {
-      this.#films = generateQuantityFilms(FILMS_COUNT, this.#comments);
-    }
-
     return this.#films;
   }
+
+  updateFilm = (updateType, update) => {
+    const filmIndex = this.#films.findIndex((film) => film.id === update.id);
+
+    if (filmIndex === -1) {
+      throw new Error('Can\'t update film');
+    }
+
+    this.#films = [
+      ...this.#films.slice(0, filmIndex),
+      update,
+      ...this.#films.slice(filmIndex + 1),
+    ];
+
+    this._notify(updateType, update);
+  };
 }
 

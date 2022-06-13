@@ -9,9 +9,9 @@ const actors = ['Erich von Stroheim', 'Mary Beth Hughes', 'Dan Duryea', 'Will Sm
 const countries = ['USA', 'Russia', 'China'];
 const descriptions = ['The film opens following a murder', 'at a cabaret in Mexico City in 1936', 'and then presents the events leading up to it in flashback.', 'The Great Flamarion (Erich von Stroheim) is an arrogant, friendless, and misogynous marksman who displays his trick gunshot act in the vaudeville circuit. His show features a beautiful assistant', 'Connie (Mary Beth Hughes) and her drunken husband Al (Dan Duryea), Flamarion\'s other assistant. Flamarion falls in love with Connie, the movie\'s femme fatale, and is soon manipulated by her into killing her no good husband during one of their acts'];
 
-const generateFilm = (id, comments) => ({
+const generateFilm = (id) => ({
   id: id,
-  comments: Array.from({ length: getRandomNumber(0, comments.length) }, () => getRandomNumber(0, 20)),
+  comments: Array.from({ length: getRandomNumber(0, 20) }, () => getRandomNumber(0, 20)),
   filmInfo: {
     title: getRandomArrayItem(titles),
     alternativeTitle: getRandomArrayItem(titles),
@@ -37,4 +37,4 @@ const generateFilm = (id, comments) => ({
   },
 });
 
-export const generateQuantityFilms = (count, comments = []) => Array.from({ length: count }).map((item, id) => generateFilm(id, comments));
+export const generateQuantityFilms = (count) => Array.from({ length: count }).map((item, id) => generateFilm(id));

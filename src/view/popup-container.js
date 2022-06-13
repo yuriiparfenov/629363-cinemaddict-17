@@ -1,4 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import he from 'he';
 import { transformDuration, transformReleaseDate } from '../utils';
 
 const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
@@ -11,13 +12,13 @@ const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${elem.author}</span>
         <span class="film-details__comment-day">${transformReleaseDate(elem.date)}</span>
-        <button class="film-details__comment-delete">Delete</button>
+        <button class="film-details__comment-delete" data-id=${elem.id}>Delete</button>
       </p>
     </div>
   </li>
 `).join(' '));
 
-const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCommentEmotion }, filmComments) => {
+const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCommentEmotion, textComment }, filmComments) => {
   const { title, totalRating, writers, actors, release, runtime, poster, description, ageRating, alternativeTitle, director } = filmInfo;
   const commentsArray = filmComments.filter((elem) => (comments.includes(elem.id)));
 
@@ -103,10 +104,10 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCom
     </ul>
 
     <div class="film-details__new-comment">
-      <div class="film-details__add-emoji-label"></div>
+      <div class="film-details__add-emoji-label">${filmCommentEmotion ? `<img src="images/emoji/${filmCommentEmotion}.png" width="55" height="55" alt="emoji-smile">` : ''}</div>
 
       <label class="film-details__comment-label">
-        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${he.encode(textComment)}</textarea>
       </label>
 
       <div class="film-details__emoji-list">
@@ -146,7 +147,7 @@ export default class PopupContainerView extends AbstractStatefulView {
     super();
     //this.#film = film;
     this.#filmComments = comments;
-    this._state = PopupContainerView.parseFilmEmotionToState(film);
+    this._state = PopupContainerView.parseFilmEmotionToState(film, comments);
     this.#setCommentHandler();
   }
 
@@ -180,11 +181,32 @@ export default class PopupContainerView extends AbstractStatefulView {
     this.setFavoriteClickHandler(this._callback.favoriteClick);
     this.setHistoryClickHandler(this._callback.whatchedClick);
     this.setWhatchlistClickHandler(this._callback.addToWatchClick);
+    this.setDeleteCommentClickHandler(this._callback.deleteCommentClick);
   };
 
-  static parseFilmEmotionToState = (film) => ({ ...film, filmCommentEmotion: '' });
+  static parseFilmEmotionToState = (film, comments) => ({ ...film, filmCommentEmotion: '', textComment: '', allComments: comments });
 
-  #filmCommentEmotionHadler = (evt) => {
+  static parseStateToFilm = (state) => {
+    const film = { ...state };
+    this.#filmComments = this._state.allComments;
+
+    return film;
+  };
+
+  setDeleteCommentClickHandler = (callback) => {
+    this._callback.deleteCommentClick = callback;
+    const deleteButton = this.element.querySelectorAll('.film-details__comment-delete');
+    deleteButton.forEach((button) => button.addEventListener('click', this.#deleteCommentClickHandler));
+  };
+
+  #deleteCommentClickHandler = (evt) => {
+    evt.preventDefault();
+    const commentId = Number(evt.target.dataset.id);
+    const commentIndex = this._state.comments.findIndex((id) => id === commentId);
+    this._callback.deleteCommentClick(commentIndex);
+  };
+
+  #filmCommentEmotionHandler = (evt) => {
     evt.preventDefault();
 
     this.updateElement({
@@ -192,8 +214,16 @@ export default class PopupContainerView extends AbstractStatefulView {
     });
   };
 
+  #filmInputCommentHandler = (evt) => {
+    evt.preventDefault();
+    this._setState({
+      textComment: evt.target.value,
+    });
+  };
+
   #setCommentHandler = () => {
-    this.element.querySelector('.film-details__emoji-list').addEventListener('change', this.#filmCommentEmotionHadler);
+    this.element.querySelector('.film-details__emoji-list').addEventListener('change', this.#filmCommentEmotionHandler);
+    this.element.querySelector('.film-details__comment-input').addEventListener('input', this.#filmInputCommentHandler);
   };
 
   reset = (film) => {

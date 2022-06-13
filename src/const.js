@@ -17,8 +17,34 @@ const SORT_TYPE = {
   RATING: 'RATING',
 };
 
+const FILTER_TYPE = {
+  ALL: 'ALL',
+  WATCH_LIST: 'WATCH_LIST',
+  HISTORY: 'HISTORY',
+  FAVORITE: 'FAVORITE',
+};
+
+const FILTER_NAME = {
+  all: 'All movies',
+  watchlist: 'Watchlist',
+  history: 'History',
+  favorite: 'Favorites',
+};
+
+const UPDATE_TYPE = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+const USER_ACTION = {
+  UPDATE_FILM: 'UPDATE_FILM',
+  ADD_COMMENT: 'ADD_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT',
+};
+
 export {
   DOUBLE_REPEAT, START_NUMBER_ARRAY,
   TOP_RATED, MOST_COMMENTED, FILMS_COUNT, COMMENTS_COUNT, N_REPEAT, POPUP_MODE,
-  SORT_TYPE
+  SORT_TYPE, FILTER_TYPE, UPDATE_TYPE, USER_ACTION, FILTER_NAME
 };

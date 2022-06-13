@@ -1,4 +1,4 @@
-import { POPUP_MODE } from '../const';
+import { POPUP_MODE, UPDATE_TYPE, USER_ACTION } from '../const';
 import { render, remove, replace } from '../framework/render';
 import FilmsCardView from '../view/film-card';
 import PopupContainerView from '../view/popup-container';
@@ -38,6 +38,7 @@ export default class FilmCardPresenter {
     this.#popUpElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
     this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
     this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
+    this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
 
     if (prevFilmElement === null || prevPopUpElement === null) {
       render(this.#filmElement, this.#filmListContainerElement);
@@ -79,6 +80,7 @@ export default class FilmCardPresenter {
     this.#popUpElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
     this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
     this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
+    this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
   };
 
   #clickClosePopupHandler = () => {
@@ -106,32 +108,54 @@ export default class FilmCardPresenter {
   };
 
   #favoriteFilmHandle = () => {
-    this.#changeFilm({
-      ...this.#film,
-      userDetails: {
-        ...this.#film.userDetails,
-        favorite: !this.#film.userDetails.favorite,
-      }
-    });
+    this.#changeFilm(
+      USER_ACTION.UPDATE_FILM,
+      this.#popupMode === POPUP_MODE.OPEN ? UPDATE_TYPE.PATCH : UPDATE_TYPE.MINOR,
+      {
+        ...this.#film,
+        userDetails: {
+          ...this.#film.userDetails,
+          favorite: !this.#film.userDetails.favorite,
+        }
+      });
   };
 
   #whatchedFilmHandle = () => {
-    this.#changeFilm({
-      ...this.#film,
-      userDetails: {
-        ...this.#film.userDetails,
-        alreadyWatched: !this.#film.userDetails.alreadyWatched,
-      }
-    });
+    this.#changeFilm(
+      USER_ACTION.UPDATE_FILM,
+      this.#popupMode === POPUP_MODE.OPEN ? UPDATE_TYPE.PATCH : UPDATE_TYPE.MINOR,
+      {
+        ...this.#film,
+        userDetails: {
+          ...this.#film.userDetails,
+          alreadyWatched: !this.#film.userDetails.alreadyWatched,
+        }
+      });
   };
 
   #addWatchListHandle = () => {
-    this.#changeFilm({
-      ...this.#film,
-      userDetails: {
-        ...this.#film.userDetails,
-        watchList: !this.#film.userDetails.watchList,
-      }
-    });
+    this.#changeFilm(
+      USER_ACTION.UPDATE_FILM,
+      this.#popupMode === POPUP_MODE.OPEN ? UPDATE_TYPE.PATCH : UPDATE_TYPE.MINOR,
+      {
+        ...this.#film,
+        userDetails: {
+          ...this.#film.userDetails,
+          watchList: !this.#film.userDetails.watchList,
+        }
+      });
+  };
+
+  #deleteFilmCommentHandle = (index) => {
+    this.#changeFilm(
+      USER_ACTION.UPDATE_FILM,
+      UPDATE_TYPE.PATCH,
+      {
+        ...this.#film,
+        comments:[
+          ...this.#film.comments.slice(0, index),
+          ...this.#film.comments.slice(index + 1),
+        ]
+      });
   };
 }
