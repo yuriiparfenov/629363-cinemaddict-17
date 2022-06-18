@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { FILTER_TYPE } from './const';
+import { FILTER_TYPE, USER_RATING, RATING_NUMBER } from './const';
 
 dayjs.extend(duration);
 
@@ -36,7 +36,25 @@ const filter = {
   [FILTER_TYPE.WATCH_LIST]: (films) => films.filter((film) => film.userDetails.watchList),
 };
 
+const getUserRating = (filmsCount) => {
+  let userRating = '';
+
+  if (filmsCount >= RATING_NUMBER.ONE && filmsCount <= RATING_NUMBER.TEN) {
+    userRating = USER_RATING.NOVICE;
+  }
+
+  if (filmsCount >= RATING_NUMBER.ELEVEN && filmsCount <= RATING_NUMBER.TWENTY) {
+    userRating = USER_RATING.FAN;
+  }
+
+  if (filmsCount >= RATING_NUMBER.TWENTY_ONE) {
+    userRating = USER_RATING.MOVIE_BUFF;
+  }
+
+  return userRating;
+};
+
 export {
   getRandomNumber, getRandomArrayItem, months, updateFilm, compareRatings, compareDates, transformReleaseYear,
-  transformDuration, transformReleaseDate, filter
+  transformDuration, transformReleaseDate, filter, getUserRating
 };

@@ -5,6 +5,8 @@ const MOST_COMMENTED = 'Most commented';
 const FILMS_COUNT = 20;
 const COMMENTS_COUNT = 20;
 const N_REPEAT = 5;
+const AUTHORIZATION = 'Basic 5dilinwarcraft34';
+const END_POINT = 'https://17.ecmascript.pages.academy/cinemaddict';
 
 const POPUP_MODE = {
   OPEN: 'OPEN',
@@ -35,6 +37,7 @@ const UPDATE_TYPE = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 const USER_ACTION = {
@@ -43,8 +46,36 @@ const USER_ACTION = {
   DELETE_COMMENT: 'DELETE_COMMENT',
 };
 
+const METHOD = {
+  GET: 'GET',
+  PUT: 'PUT',
+  DELETE: 'DELETE',
+  POST: 'POST',
+};
+
+const URL_LINK = {
+  MOVIES: 'movies',
+  COMMENTS: 'comments',
+};
+
+const USER_RATING = {
+  NOVICE: 'Novice',
+  FAN: 'Fan',
+  MOVIE_BUFF: 'Movie Buff',
+};
+
+const RATING_NUMBER = {
+  ZERO: 0,
+  ONE: 1,
+  TEN: 10,
+  ELEVEN: 11,
+  TWENTY: 20,
+  TWENTY_ONE: 21,
+};
+
 export {
   DOUBLE_REPEAT, START_NUMBER_ARRAY,
   TOP_RATED, MOST_COMMENTED, FILMS_COUNT, COMMENTS_COUNT, N_REPEAT, POPUP_MODE,
-  SORT_TYPE, FILTER_TYPE, UPDATE_TYPE, USER_ACTION, FILTER_NAME
+  SORT_TYPE, FILTER_TYPE, UPDATE_TYPE, USER_ACTION, FILTER_NAME, METHOD, URL_LINK,
+  AUTHORIZATION, END_POINT, USER_RATING, RATING_NUMBER
 };

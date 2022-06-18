@@ -1,6 +1,7 @@
 import { FILTER_TYPE, FILTER_NAME, UPDATE_TYPE } from '../const';
 import { filter } from '../utils';
 import { remove, render, replace } from '../framework/render';
+import ProfileRatingView from '../view/profile-rating';
 import NavigationView from '../view/navigation';
 
 export default class FilterPresentor {
@@ -8,6 +9,7 @@ export default class FilterPresentor {
   #filmsModel = null;
   #filterContainer = null;
   #filterElement = null;
+  ratingElement = null;
 
   constructor(filterContainer, filterModel, filmsModel) {
     this.#filterModel = filterModel;
@@ -52,17 +54,23 @@ export default class FilterPresentor {
   init = () => {
     const filters = this.filters;
     const prevFilterElement = this.#filterElement;
+    const prevRatingElement = this.ratingElement;
+    const siteHeaderElement = document.querySelector('.header');
 
     this.#filterElement = new NavigationView(filters, this.#filterModel);
     this.#filterElement.setFilterChangeHandler(this.#handleFilterChange);
+    this.ratingElement = new ProfileRatingView(filters);
 
-    if (prevFilterElement === null) {
+    if (prevFilterElement === null && prevRatingElement === null) {
       render(this.#filterElement, this.#filterContainer);
+      render(this.ratingElement, siteHeaderElement);
       return;
     }
 
     replace(this.#filterElement, prevFilterElement);
+    replace(this.ratingElement, prevRatingElement);
     remove(prevFilterElement);
+    remove(prevRatingElement);
   };
 
   #handleFilterChange = (filterType) => {

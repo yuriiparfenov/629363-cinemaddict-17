@@ -2,9 +2,9 @@ import AbstractView from '../framework/view/abstract-view';
 import { transformReleaseYear, transformDuration } from '../utils';
 
 const createFilmsCardTemplate = (film, filmComments) => {
-  const { title, totalRating, release ,runtime, genre, poster, description } = film.filmInfo;
+  const { title, totalRating, release, runtime, genre, poster, description } = film.filmInfo;
   const { watchList, alreadyWatched, favorite } = film.userDetails;
-  const commentsArray = filmComments.filter((elem) => (film.comments.includes(elem.id)));
+  const commentsArray = filmComments;
   return (
     `<article class="film-card">
         <a class="film-card__link">
@@ -15,7 +15,7 @@ const createFilmsCardTemplate = (film, filmComments) => {
             <span class="film-card__duration">${transformDuration(runtime)}</span>
             <span class="film-card__genre">${genre}</span>
           </p>
-          <img src="./images/posters/${poster}" alt="${title}" class="film-card__poster">
+          <img src="./${poster}" alt="${title}" class="film-card__poster">
           <p class="film-card__description">${description.length > 140 ? `${description.substr(0, 139)}...` : description}</p>
           <span class="film-card__comments">${commentsArray.length} comments</span>
         </a>
