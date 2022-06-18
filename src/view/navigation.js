@@ -3,7 +3,6 @@ import AbstractView from '../framework/view/abstract-view';
 
 const createFilterItemTemplate = (filter, currentFilterType) => {
   const { type, name, filmsCount } = filter;
-
   return (
     `<a href="#${type}" 
     class="main-navigation__item ${type === currentFilterType ? 'main-navigation__item--active' : ''}" data-filter-type=${type}>

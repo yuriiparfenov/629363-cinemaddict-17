@@ -33,7 +33,7 @@ const filter = {
   [FILTER_TYPE.ALL]: (films) => films,
   [FILTER_TYPE.FAVORITE]: (films) => films.filter((film) => film.userDetails.favorite),
   [FILTER_TYPE.HISTORY]: (films) => films.filter((film) => film.userDetails.alreadyWatched),
-  [FILTER_TYPE.WATCH_LIST]: (films) => films.filter((film) => film.userDetails.watchList),
+  [FILTER_TYPE.WATCH_LIST]: (films) => films.filter((film) => film.userDetails.watchlist),
 };
 
 const getUserRating = (filmsCount) => {
