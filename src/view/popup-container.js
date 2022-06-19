@@ -5,7 +5,7 @@ import { transformDuration, transformReleaseDate } from '../utils';
 const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
   <li class="film-details__comment">
     <span class="film-details__comment-emoji">
-      <img src="${elem.emotion}" width="55" height="55" alt="emoji-smile">
+      <img src="./images/emoji/${elem.emotion}.png" width="55" height="55" alt="emoji-smile">
     </span>
     <div>
       <p class="film-details__comment-text">${elem.comment}</p>
@@ -18,9 +18,9 @@ const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
   </li>
 `).join(' '));
 
-const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCommentEmotion, textComment }, filmComments) => {
+const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotion, textComment }, filmComments) => {
   const { title, totalRating, writers, actors, release, runtime, poster, description, ageRating, alternativeTitle, director } = filmInfo;
-  const commentsArray = filmComments.filter((elem) => (comments.includes(elem.id)));
+  const commentsArray = filmComments;
 
   return (
     `<section class="film-details">
@@ -31,7 +31,7 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCom
     </div>
     <div class="film-details__info-wrap">
       <div class="film-details__poster">
-        <img class="film-details__poster-img" src="./images/posters/${poster}" alt="${title}">
+        <img class="film-details__poster-img" src="./${poster}" alt="${title}">
 
         <p class="film-details__age">${ageRating}+</p>
       </div>
@@ -89,7 +89,7 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCom
     </div>
 
     <section class="film-details__controls">
-      <button type="button" class="film-details__control-button film-details__control-button--watchlist ${userDetails.watchList && 'film-details__control-button--active'}" id="watchlist" name="watchlist">Add to watchlist</button>
+      <button type="button" class="film-details__control-button film-details__control-button--watchlist ${userDetails.watchlist && 'film-details__control-button--active'}" id="watchlist" name="watchlist">Add to watchlist</button>
       <button type="button" class="film-details__control-button film-details__control-button--watched ${userDetails.alreadyWatched && 'film-details__control-button--active'}" id="watched" name="watched">Already watched</button>
       <button type="button" class="film-details__control-button film-details__control-button--favorite ${userDetails.favorite && 'film-details__control-button--active'}" id="favorite" name="favorite">Add to favorites</button>
     </section>
@@ -140,15 +140,15 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, comments, filmCom
 };
 
 export default class PopupContainerView extends AbstractStatefulView {
-  //#film = null;
   #filmComments = null;
+  #commentsModel = null;
 
-  constructor(film, comments) {
+  constructor(film, comments, commentsModel) {
     super();
-    //this.#film = film;
     this.#filmComments = comments;
     this._state = PopupContainerView.parseFilmEmotionToState(film, comments);
     this.#setCommentHandler();
+    this.#commentsModel = commentsModel;
   }
 
   get template() {
@@ -202,6 +202,7 @@ export default class PopupContainerView extends AbstractStatefulView {
   #deleteCommentClickHandler = (evt) => {
     evt.preventDefault();
     const commentId = Number(evt.target.dataset.id);
+    //this.#commentsModel.deleteComment(commentId);
     const commentIndex = this._state.comments.findIndex((id) => id === commentId);
     this._callback.deleteCommentClick(commentIndex);
   };

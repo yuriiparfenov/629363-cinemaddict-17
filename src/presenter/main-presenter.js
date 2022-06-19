@@ -7,10 +7,11 @@ import ShowMoreButtonView from '../view/show-more-button';
 import TopRatedFilmsView from '../view/top-rated-films';
 import MostCommentedFilmsView from '../view/most-commented-films';
 import FilmsEmptyView from '../view/films-empty';
-import { START_NUMBER_ARRAY, DOUBLE_REPEAT, N_REPEAT, SORT_TYPE, UPDATE_TYPE, FILTER_TYPE, USER_ACTION } from '../const';
+import { START_NUMBER_ARRAY, N_REPEAT, SORT_TYPE, UPDATE_TYPE, FILTER_TYPE, USER_ACTION } from '../const';
 import FilmCardPresenter from './film-card-presenter';
+import LoadingFilmsComponent from '../view/loading-films';
 import { compareDates, compareRatings, filter } from '../utils';
-import { nanoid } from 'nanoid';
+//import { nanoid } from 'nanoid';
 
 export default class MainPresenter {
   filmsListMainContainer = new FilmsMainContainerView();
@@ -20,6 +21,7 @@ export default class MainPresenter {
   filmsListRatedContainer = new FilmsListContainerView();
   filmsListExtraCommented = new MostCommentedFilmsView();
   filmsListCommentedContainer = new FilmsListContainerView();
+  loadingFilmsComponent = new LoadingFilmsComponent();
   #sortFilms = null;
   #showButton = null;
   #element = null;
@@ -30,20 +32,22 @@ export default class MainPresenter {
   #commentsModel = null;
   #filterModel = null;
   #filterType = FILTER_TYPE.ALL;
+  #isLoading = true;
 
   constructor(element, filmsModel, commentsModel, filterModel) {
     this.#element = element;
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
     this.#filterModel = filterModel;
+
     this.#filmsModel.addObserver(this.#handleModelEvent);
-    this.#commentsModel.addObserver(this.#handleModelEvent);
+    //this.#commentsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get films() {
     this.#filterType = this.#filterModel.filter;
-    const films = this.#filmsModel.films;
+    const films = [...this.#filmsModel.films];
     const filteredFilms = filter[this.#filterType](films);
 
     switch (this.#currentSortType) {
@@ -52,11 +56,8 @@ export default class MainPresenter {
       case SORT_TYPE.RATING:
         return filteredFilms.sort(compareRatings);
     }
-    return filteredFilms;
-  }
 
-  get comments() {
-    return this.#commentsModel.comments;
+    return filteredFilms;
   }
 
   #handleModelEvent = (updateType, data) => {
@@ -67,24 +68,32 @@ export default class MainPresenter {
       case UPDATE_TYPE.MINOR:
         this.#clearFilmsList();
         this.#renderFilmsList();
-        this.#renderSortFilmsByRating();
-        this.#renderSortFilmsByComments();
+        //this.#renderSortFilmsByRating();
+        //this.#renderSortFilmsByComments();
         break;
       case UPDATE_TYPE.MAJOR:
         this.#clearFilmsList({ resetFilmsCount: true, resetSortType: true });
         this.#renderFilmsList();
-        this.#renderSortFilmsByRating();
-        this.#renderSortFilmsByComments();
+        //this.#renderSortFilmsByRating();
+        //this.#renderSortFilmsByComments();
+        break;
+      case UPDATE_TYPE.INIT:
+        this.#isLoading = false;
+        remove(this.loadingFilmsComponent);
+        this.#renderFilmsList();
+        //this.#renderSortFilmsByRating();
+        //this.#renderSortFilmsByComments();
         break;
     }
   };
 
   #renderFilm = (container, film) => {
-    const filmPresenter = new FilmCardPresenter(container, this.#handleViewChangeByAction, this.#handleModeChange, this.comments);
+
+    const filmPresenter = new FilmCardPresenter(container, this.#handleViewChangeByAction, this.#handleModeChange, this.#commentsModel);
     filmPresenter.init(film);
-    const filmId = nanoid();
-    film.id = filmId;
-    this.#filmPresenter.set(filmId, filmPresenter);
+    //const filmId = nanoid();
+    //film.id = filmId;
+    this.#filmPresenter.set(film.id, filmPresenter);
   };
 
   #renderAllFilmsContainers = () => {
@@ -100,8 +109,8 @@ export default class MainPresenter {
     this.#currentSortType = sortType;
     this.#clearFilmsList({ resetFilmsCount: true });
     this.#renderFilmsList(); //рендер фильмов по сортировке
-    this.#renderSortFilmsByRating(); //рендер 2 самых рейтинговых фильмов
-    this.#renderSortFilmsByComments(); // рендер 2 самых комментированных фильмов
+    //this.#renderSortFilmsByRating(); //рендер 2 самых рейтинговых фильмов
+    //this.#renderSortFilmsByComments(); // рендер 2 самых комментированных фильмов
   };
 
   #renderSortMenu = () => {
@@ -113,6 +122,11 @@ export default class MainPresenter {
   #renderFilmsList = () => {
     const films = this.films;
     const filmsCount = films.length;
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
 
     if (!this.films.length) {
       render(new FilmsEmptyView(), this.filmsList.element);
@@ -149,6 +163,7 @@ export default class MainPresenter {
     films.forEach((film) => this.#renderFilm(this.filmsListContainer.element, film));
   };
 
+  /*
   #renderSortFilmsByRating = () => {
     render(this.filmsListExtraRated, this.filmsListMainContainer.element);
     render(this.filmsListRatedContainer, this.filmsListExtraRated.element);
@@ -167,6 +182,10 @@ export default class MainPresenter {
 
     sortFilmsByComments.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
       .map((film) => this.#renderFilm(this.filmsListCommentedContainer.element, film));
+  }; */
+
+  #renderLoading = () => {
+    render(this.loadingFilmsComponent, this.filmsList.element);
   };
 
   #clearFilmsList = ({ resetFilmsCount = false, resetSortType = false } = {}) => {
@@ -175,6 +194,7 @@ export default class MainPresenter {
     this.#filmPresenter.clear();
     remove(this.#sortFilms);
     remove(this.#showButton);
+    remove(this.loadingFilmsComponent);
 
     if (resetFilmsCount) {
       this.#renderedFilmCount = N_REPEAT;
@@ -208,7 +228,7 @@ export default class MainPresenter {
   init = () => {
     this.#renderAllFilmsContainers();//render всех контейнеров для списка фильмов
     this.#renderFilmsList(); //render самого списка фильмов
-    this.#renderSortFilmsByRating(); //render 2-х самых рейтинговых фильмов
-    this.#renderSortFilmsByComments(); //render 2-х самых комментируемых фильмво
+    //this.#renderSortFilmsByRating(); //render 2-х самых рейтинговых фильмов
+    //this.#renderSortFilmsByComments(); //render 2-х самых комментируемых фильмво
   };
 }

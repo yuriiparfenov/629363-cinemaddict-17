@@ -12,22 +12,26 @@ export default class FilmCardPresenter {
   #changeMode = null;
   #popupMode = POPUP_MODE.CLOSED;
   #filmComments = null;
+  #commentsModel = null;
 
-  constructor(filmListContainerElement, changeFilm, changeMode, comments) {
+  constructor(filmListContainerElement, changeFilm, changeMode, commentsModel) {
     this.#filmListContainerElement = filmListContainerElement;
     this.#changeFilm = changeFilm;
     this.#changeMode = changeMode;
-    this.#filmComments = comments;
+    this.#commentsModel = commentsModel;
   }
 
-  init = (film) => {
+  init = async (film) => {
     this.#film = film;
+    await this.#commentsModel.init(this.#film);
+    this.#filmComments = this.#commentsModel.comments;
 
     const prevFilmElement = this.#filmElement;
     const prevPopUpElement = this.#popUpElement;
 
-    this.#filmElement = new FilmsCardView(film, this.#filmComments);
-    this.#popUpElement = new PopupContainerView(film, this.#filmComments);
+
+    this.#filmElement = new FilmsCardView(this.#film, this.#filmComments);
+    this.#popUpElement = new PopupContainerView(this.#film, this.#filmComments, this.#commentsModel);
 
     this.#filmElement.setClickHandler(this.#clickOpenPopUpHandler);
     this.#filmElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
@@ -141,7 +145,7 @@ export default class FilmCardPresenter {
         ...this.#film,
         userDetails: {
           ...this.#film.userDetails,
-          watchList: !this.#film.userDetails.watchList,
+          watchlist: !this.#film.userDetails.watchlist,
         }
       });
   };
@@ -152,7 +156,7 @@ export default class FilmCardPresenter {
       UPDATE_TYPE.PATCH,
       {
         ...this.#film,
-        comments:[
+        comments: [
           ...this.#film.comments.slice(0, index),
           ...this.#film.comments.slice(index + 1),
         ]

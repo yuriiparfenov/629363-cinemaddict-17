@@ -2,9 +2,9 @@ import AbstractView from '../framework/view/abstract-view';
 import { transformReleaseYear, transformDuration } from '../utils';
 
 const createFilmsCardTemplate = (film, filmComments) => {
-  const { title, totalRating, release ,runtime, genre, poster, description } = film.filmInfo;
-  const { watchList, alreadyWatched, favorite } = film.userDetails;
-  const commentsArray = filmComments.filter((elem) => (film.comments.includes(elem.id)));
+  const { title, totalRating, release, runtime, genre, poster, description } = film.filmInfo;
+  const { watchlist, alreadyWatched, favorite } = film.userDetails;
+  const commentsArray = filmComments;
   return (
     `<article class="film-card">
         <a class="film-card__link">
@@ -15,12 +15,12 @@ const createFilmsCardTemplate = (film, filmComments) => {
             <span class="film-card__duration">${transformDuration(runtime)}</span>
             <span class="film-card__genre">${genre}</span>
           </p>
-          <img src="./images/posters/${poster}" alt="${title}" class="film-card__poster">
+          <img src="./${poster}" alt="${title}" class="film-card__poster">
           <p class="film-card__description">${description.length > 140 ? `${description.substr(0, 139)}...` : description}</p>
           <span class="film-card__comments">${commentsArray.length} comments</span>
         </a>
         <div class="film-card__controls">
-          <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${watchList && 'film-card__controls-item--active'}" type="button">Add to watchlist</button>
+          <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${watchlist && 'film-card__controls-item--active'}" type="button">Add to watchlist</button>
           <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${alreadyWatched && 'film-card__controls-item--active'}" type="button">Mark as watched</button>
           <button class="film-card__controls-item film-card__controls-item--favorite ${favorite && 'film-card__controls-item--active'}" type="button">Mark as favorite</button>
         </div>

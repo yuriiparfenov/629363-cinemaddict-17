@@ -1,3 +1,4 @@
+/*
 import { getRandomArrayItem, getRandomNumber, months } from '../utils';
 
 const titles = ['Made for each other', 'Popeye meets Sindbad', 'Sagebrush trail', 'Santa Claus conquers the martians', 'The dance of life', 'The great flamation', 'The man with the golden arm'];
@@ -38,3 +39,5 @@ const generateFilm = (id) => ({
 });
 
 export const generateQuantityFilms = (count) => Array.from({ length: count }).map((item, id) => generateFilm(id));
+
+*/
