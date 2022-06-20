@@ -7,7 +7,8 @@ import ShowMoreButtonView from '../view/show-more-button';
 import TopRatedFilmsView from '../view/top-rated-films';
 import MostCommentedFilmsView from '../view/most-commented-films';
 import FilmsEmptyView from '../view/films-empty';
-import { START_NUMBER_ARRAY, N_REPEAT, SORT_TYPE, UPDATE_TYPE, FILTER_TYPE, USER_ACTION } from '../const';
+import UiBlocker from '../framework/ui-blocker/ui-blocker';
+import { START_NUMBER_ARRAY, N_REPEAT, SORT_TYPE, UPDATE_TYPE, FILTER_TYPE, USER_ACTION, TIME_LIMIT } from '../const';
 import FilmCardPresenter from './film-card-presenter';
 import LoadingFilmsComponent from '../view/loading-films';
 import { compareDates, compareRatings, filter } from '../utils';
@@ -33,6 +34,7 @@ export default class MainPresenter {
   #filterModel = null;
   #filterType = FILTER_TYPE.ALL;
   #isLoading = true;
+  #uiBlocker = new UiBlocker(TIME_LIMIT.LOWER_LIMIT, TIME_LIMIT.UPPER_LIMIT);
 
   constructor(element, filmsModel, commentsModel, filterModel) {
     this.#element = element;
@@ -88,11 +90,8 @@ export default class MainPresenter {
   };
 
   #renderFilm = (container, film) => {
-
     const filmPresenter = new FilmCardPresenter(container, this.#handleViewChangeByAction, this.#handleModeChange, this.#commentsModel);
     filmPresenter.init(film);
-    //const filmId = nanoid();
-    //film.id = filmId;
     this.#filmPresenter.set(film.id, filmPresenter);
   };
 
@@ -207,7 +206,9 @@ export default class MainPresenter {
     }
   };
 
-  #handleViewChangeByAction = (actionType, updateType, update, comment) => {
+  #handleViewChangeByAction = (actionType, updateType, update, comment, commentIndex) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case USER_ACTION.UPDATE_FILM:
         this.#filmsModel.updateFilm(updateType, update);
@@ -216,9 +217,11 @@ export default class MainPresenter {
         this.#commentsModel.addComment(updateType, update, comment);
         break;
       case USER_ACTION.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, update);
+        this.#commentsModel.deleteComment(updateType, comment, commentIndex);
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModeChange = () => {

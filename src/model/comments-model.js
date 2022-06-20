@@ -40,24 +40,19 @@ export default class CommentsModel extends Observable {
     }
   };
 
-  deleteComment = async (updateType, update) => {
-    console.log('update', update);
-    console.log('comments', this.#comments);
-    const commentIndex = this.#comments.findIndex((comment) => Number(comment.id) === Number(update.id));
-    console.log(commentIndex);
-
-    if (commentIndex === -1) {
+  deleteComment = async (updateType, commentToDelete, indexOfComment) => {
+    if (indexOfComment === -1) {
       throw new Error('Can\'t delete comment');
     }
 
     try {
-      await this.#commentsApiService.deleteComment(update.comments);
+      await this.#commentsApiService.deleteComment(commentToDelete.id);
       this.#comments = [
-        ...this.#comments.slice(0, commentIndex),
-        ...this.#comments.slice(commentIndex + 1),
+        ...this.#comments.slice(0, indexOfComment),
+        ...this.#comments.slice(indexOfComment + 1),
       ];
 
-      this._notify(updateType);
+      this._notify(updateType, commentToDelete);
 
     } catch (err) {
       throw new Error('Can\t delete this comment');

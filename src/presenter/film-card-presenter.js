@@ -43,6 +43,7 @@ export default class FilmCardPresenter {
     this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
     this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
     this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
+    this.#popUpElement.setAddCommentCLickHandler(this.#addFilmCommentHandle);
 
     if (prevFilmElement === null || prevPopUpElement === null) {
       render(this.#filmElement, this.#filmListContainerElement);
@@ -85,6 +86,7 @@ export default class FilmCardPresenter {
     this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
     this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
     this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
+    this.#popUpElement.setAddCommentCLickHandler(this.#addFilmCommentHandle);
   };
 
   #clickClosePopupHandler = () => {
@@ -160,6 +162,23 @@ export default class FilmCardPresenter {
           ...this.#film.comments.slice(0, index),
           ...this.#film.comments.slice(index + 1),
         ]
-      });
+      },
+      this.#filmComments[index],
+      index);
+  };
+
+  #addFilmCommentHandle = (addComment) => {
+    this.#changeFilm(
+      USER_ACTION.ADD_COMMENT,
+      UPDATE_TYPE.PATCH,
+      {
+        ...this.#film,
+        comments: [
+          ...this.#film.comments,
+          addComment,
+        ]
+      },
+      addComment,
+    );
   };
 }
