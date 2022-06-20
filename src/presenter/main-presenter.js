@@ -207,13 +207,13 @@ export default class MainPresenter {
     }
   };
 
-  #handleViewChangeByAction = (actionType, updateType, update) => {
+  #handleViewChangeByAction = (actionType, updateType, update, comment) => {
     switch (actionType) {
       case USER_ACTION.UPDATE_FILM:
         this.#filmsModel.updateFilm(updateType, update);
         break;
       case USER_ACTION.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, update);
+        this.#commentsModel.addComment(updateType, update, comment);
         break;
       case USER_ACTION.DELETE_COMMENT:
         this.#commentsModel.deleteComment(updateType, update);

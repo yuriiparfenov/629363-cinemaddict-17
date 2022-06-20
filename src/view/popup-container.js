@@ -202,8 +202,7 @@ export default class PopupContainerView extends AbstractStatefulView {
   #deleteCommentClickHandler = (evt) => {
     evt.preventDefault();
     const commentId = Number(evt.target.dataset.id);
-    //this.#commentsModel.deleteComment(commentId);
-    const commentIndex = this._state.comments.findIndex((id) => id === commentId);
+    const commentIndex = this._state.comments.findIndex((id) => Number(id) === commentId);
     this._callback.deleteCommentClick(commentIndex);
   };
 

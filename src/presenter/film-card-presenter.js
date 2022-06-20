@@ -152,7 +152,7 @@ export default class FilmCardPresenter {
 
   #deleteFilmCommentHandle = (index) => {
     this.#changeFilm(
-      USER_ACTION.UPDATE_FILM,
+      USER_ACTION.DELETE_COMMENT,
       UPDATE_TYPE.PATCH,
       {
         ...this.#film,
