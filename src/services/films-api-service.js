@@ -20,7 +20,9 @@ export default class FilmsApiService extends ApiService {
   };
 
   #adaptToServer = (film) => {
-    const adaptedFilm = {...film,
+    const adaptedFilm = {
+      ...film,
+      'comments': [...film.comments],
       'film_info': {
         title: film.filmInfo.title,
         'alternative_title': film.filmInfo.alternativeTitle,

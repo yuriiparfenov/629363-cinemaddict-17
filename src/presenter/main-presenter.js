@@ -43,7 +43,7 @@ export default class MainPresenter {
     this.#filterModel = filterModel;
 
     this.#filmsModel.addObserver(this.#handleModelEvent);
-    //this.#commentsModel.addObserver(this.#handleModelEvent);
+    this.#commentsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
@@ -217,7 +217,7 @@ export default class MainPresenter {
         this.#commentsModel.addComment(updateType, update, comment);
         break;
       case USER_ACTION.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, comment, commentIndex);
+        this.#commentsModel.deleteComment(updateType, update, comment, commentIndex);
         break;
     }
 

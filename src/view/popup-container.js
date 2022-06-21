@@ -107,10 +107,10 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotio
       <div class="film-details__add-emoji-label">${filmCommentEmotion ? `<img src="images/emoji/${filmCommentEmotion}.png" width="55" height="55" alt="emoji-smile">` : ''}</div>
 
       <label class="film-details__comment-label">
-        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${he.encode(textComment)}</textarea>
+        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${isDisabled ? 'disabled' : ''}>${he.encode(textComment)}</textarea>
       </label>
 
-      <div class="film-details__emoji-list">
+      <div class="film-details__emoji-list" ${isDisabled ? 'disabled' : ''}>
         <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile" ${filmCommentEmotion === 'smile' && 'checked'}>
         <label class="film-details__emoji-label" for="emoji-smile">
           <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">

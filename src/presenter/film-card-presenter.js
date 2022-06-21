@@ -175,7 +175,7 @@ export default class FilmCardPresenter {
         ...this.#film,
         comments: [
           ...this.#film.comments,
-          addComment,
+          addComment.comment,
         ]
       },
       addComment,

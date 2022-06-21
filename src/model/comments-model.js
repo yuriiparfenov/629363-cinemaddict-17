@@ -1,4 +1,3 @@
-import { UPDATE_TYPE } from '../const';
 import ApiService from '../framework/api-service';
 import Observable from '../framework/observable';
 
@@ -24,7 +23,7 @@ export default class CommentsModel extends Observable {
     } catch (err) {
       this.#comments = [];
     }
-    this._notify(UPDATE_TYPE.INIT, this.#filmId);
+    this._notify(film);
   };
 
   addComment = async (updateType, update, comment) => {
@@ -40,7 +39,7 @@ export default class CommentsModel extends Observable {
     }
   };
 
-  deleteComment = async (updateType, commentToDelete, indexOfComment) => {
+  deleteComment = async (updateType, update, commentToDelete, indexOfComment) => {
     if (indexOfComment === -1) {
       throw new Error('Can\'t delete comment');
     }
@@ -52,7 +51,7 @@ export default class CommentsModel extends Observable {
         ...this.#comments.slice(indexOfComment + 1),
       ];
 
-      this._notify(updateType, commentToDelete);
+      this._notify(updateType, update);
 
     } catch (err) {
       throw new Error('Can\t delete this comment');
