@@ -1,4 +1,4 @@
-import { POPUP_MODE, UPDATE_TYPE, USER_ACTION } from '../const';
+import { POPUP_MODE, UPDATE_TYPE, USER_ACTION, SHAKE_CLASS_NAME, SHAKE_ANIMATION_TIMEOUT } from '../const';
 import { render, remove, replace } from '../framework/render';
 import FilmsCardView from '../view/film-card';
 import PopupContainerView from '../view/popup-container';
@@ -28,7 +28,6 @@ export default class FilmCardPresenter {
 
     const prevFilmElement = this.#filmElement;
     const prevPopUpElement = this.#popUpElement;
-
 
     this.#filmElement = new FilmsCardView(this.#film, this.#filmComments);
     this.#popUpElement = new PopupContainerView(this.#film, this.#filmComments, this.#commentsModel);
@@ -69,8 +68,43 @@ export default class FilmCardPresenter {
   };
 
   resetView = () => {
-    if (this.#popupMode !== POPUP_MODE.CLOSED) {
+    if (this.#popupMode !== POPUP_MODE.CLOSED && document.body.contains(this.#popUpElement.element)) {
       this.#clickClosePopupHandler();
+    }
+  };
+
+  setSaving = () => {
+    this.#popUpElement.updateElement({
+      isDisabled: true,
+    });
+    this.#filmElement.updateElement({
+      isDisabled: true,
+    });
+  };
+
+  setDeleting = () => {
+    this.#popUpElement.updateElement({
+      isDisabled: true,
+    });
+  };
+
+  setAborting = () => {
+    const resetFilmState = () => {
+      this.#filmElement.updateElement({
+        isDisabled: false,
+      });
+    };
+
+    if (document.body.contains(this.#popUpElement.element)) {
+      this.#popUpElement.updateElement({
+        isDisabled: false,
+      });
+      document.querySelector('.film-details__inner').classList.add(SHAKE_CLASS_NAME);
+      setTimeout(() => {
+        document.querySelector('.film-details__inner').classList.remove(SHAKE_CLASS_NAME);
+      }, SHAKE_ANIMATION_TIMEOUT);
+    } else {
+      this.#filmElement.shake(resetFilmState);
     }
   };
 
@@ -87,17 +121,24 @@ export default class FilmCardPresenter {
     this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
     this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
     this.#popUpElement.setAddCommentCLickHandler(this.#addFilmCommentHandle);
+
+    this.#popUpElement.updateElement({
+      isDisabled: false,
+    });
   };
 
   #clickClosePopupHandler = () => {
     this.#closePopupHandle();
     this.#popupMode = POPUP_MODE.CLOSED;
     document.removeEventListener('keydown', this.#onEscCloseHandle);
-    document.body.classList.remove('hide-overflow');
+    this.#filmElement.updateElement({
+      isDisabled: false,
+    });
   };
 
   #closePopupHandle = () => {
     remove(this.#popUpElement);
+    document.body.classList.remove('hide-overflow');
   };
 
   #onEscCloseHandle = (evt) => {

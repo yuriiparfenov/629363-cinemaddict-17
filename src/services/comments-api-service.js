@@ -9,7 +9,6 @@ export default class CommentsApiService extends ApiService {
       url: `${URL_LINK.COMMENTS}/${commentId}`,
       method: METHOD.DELETE,
     });
-
     return response;
   };
 
@@ -20,7 +19,6 @@ export default class CommentsApiService extends ApiService {
       body: JSON.stringify(comment),
       headers: new Headers({'Content-type': 'application/json'}),
     });
-
     return response;
   };
 }

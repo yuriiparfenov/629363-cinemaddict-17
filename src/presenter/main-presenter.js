@@ -4,24 +4,23 @@ import FilmsMainContainerView from '../view/films-main-container';
 import FilmsListView from '../view/films-list';
 import FilmsListContainerView from '../view/films-list-container';
 import ShowMoreButtonView from '../view/show-more-button';
-import TopRatedFilmsView from '../view/top-rated-films';
-import MostCommentedFilmsView from '../view/most-commented-films';
+//import TopRatedFilmsView from '../view/top-rated-films';
+//import MostCommentedFilmsView from '../view/most-commented-films';
 import FilmsEmptyView from '../view/films-empty';
 import UiBlocker from '../framework/ui-blocker/ui-blocker';
 import { START_NUMBER_ARRAY, N_REPEAT, SORT_TYPE, UPDATE_TYPE, FILTER_TYPE, USER_ACTION, TIME_LIMIT } from '../const';
 import FilmCardPresenter from './film-card-presenter';
 import LoadingFilmsComponent from '../view/loading-films';
 import { compareDates, compareRatings, filter } from '../utils';
-//import { nanoid } from 'nanoid';
 
 export default class MainPresenter {
   filmsListMainContainer = new FilmsMainContainerView();
   filmsList = new FilmsListView();
   filmsListContainer = new FilmsListContainerView();
-  filmsListExtraRated = new TopRatedFilmsView();
-  filmsListRatedContainer = new FilmsListContainerView();
-  filmsListExtraCommented = new MostCommentedFilmsView();
-  filmsListCommentedContainer = new FilmsListContainerView();
+  //filmsListExtraRated = new TopRatedFilmsView();
+  //filmsListRatedContainer = new FilmsListContainerView();
+  //filmsListExtraCommented = new MostCommentedFilmsView();
+  //filmsListCommentedContainer = new FilmsListContainerView();
   loadingFilmsComponent = new LoadingFilmsComponent();
   #sortFilms = null;
   #showButton = null;
@@ -70,21 +69,15 @@ export default class MainPresenter {
       case UPDATE_TYPE.MINOR:
         this.#clearFilmsList();
         this.#renderFilmsList();
-        //this.#renderSortFilmsByRating();
-        //this.#renderSortFilmsByComments();
         break;
       case UPDATE_TYPE.MAJOR:
         this.#clearFilmsList({ resetFilmsCount: true, resetSortType: true });
         this.#renderFilmsList();
-        //this.#renderSortFilmsByRating();
-        //this.#renderSortFilmsByComments();
         break;
       case UPDATE_TYPE.INIT:
         this.#isLoading = false;
         remove(this.loadingFilmsComponent);
         this.#renderFilmsList();
-        //this.#renderSortFilmsByRating();
-        //this.#renderSortFilmsByComments();
         break;
     }
   };
@@ -107,9 +100,7 @@ export default class MainPresenter {
     }
     this.#currentSortType = sortType;
     this.#clearFilmsList({ resetFilmsCount: true });
-    this.#renderFilmsList(); //рендер фильмов по сортировке
-    //this.#renderSortFilmsByRating(); //рендер 2 самых рейтинговых фильмов
-    //this.#renderSortFilmsByComments(); // рендер 2 самых комментированных фильмов
+    this.#renderFilmsList();
   };
 
   #renderSortMenu = () => {
@@ -162,27 +153,6 @@ export default class MainPresenter {
     films.forEach((film) => this.#renderFilm(this.filmsListContainer.element, film));
   };
 
-  /*
-  #renderSortFilmsByRating = () => {
-    render(this.filmsListExtraRated, this.filmsListMainContainer.element);
-    render(this.filmsListRatedContainer, this.filmsListExtraRated.element);
-
-    const sortFilmsByRating = this.#filmsModel.films.sort(compareRatings);
-
-    sortFilmsByRating.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
-      .map((film) => this.#renderFilm(this.filmsListRatedContainer.element, film));
-  };
-
-  #renderSortFilmsByComments = () => {
-    render(this.filmsListExtraCommented, this.filmsListMainContainer.element);
-    render(this.filmsListCommentedContainer, this.filmsListExtraCommented.element);
-
-    const sortFilmsByComments = this.#filmsModel.films.sort((prevElem, nextElem) => nextElem.comments.length - prevElem.comments.length);
-
-    sortFilmsByComments.slice(START_NUMBER_ARRAY, DOUBLE_REPEAT)
-      .map((film) => this.#renderFilm(this.filmsListCommentedContainer.element, film));
-  }; */
-
   #renderLoading = () => {
     render(this.loadingFilmsComponent, this.filmsList.element);
   };
@@ -206,21 +176,34 @@ export default class MainPresenter {
     }
   };
 
-  #handleViewChangeByAction = (actionType, updateType, update, comment, commentIndex) => {
+  #handleViewChangeByAction = async (actionType, updateType, update, comment, commentIndex) => {
     this.#uiBlocker.block();
-
     switch (actionType) {
       case USER_ACTION.UPDATE_FILM:
-        this.#filmsModel.updateFilm(updateType, update);
+        this.#filmPresenter.get(update.id).setSaving();
+        try {
+          await this.#filmsModel.updateFilm(updateType, update);
+        } catch (err) {
+          this.#filmPresenter.get(update.id).setAborting();
+        }
         break;
       case USER_ACTION.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, update, comment);
+        this.#filmPresenter.get(update.id).setSaving();
+        try {
+          await this.#commentsModel.addComment(updateType, update, comment);
+        } catch (err) {
+          this.#filmPresenter.get(update.id).setAborting();
+        }
         break;
       case USER_ACTION.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, update, comment, commentIndex);
+        this.#filmPresenter.get(update.id).setDeleting();
+        try {
+          await this.#commentsModel.deleteComment(updateType, update, comment, commentIndex);
+        } catch (err) {
+          this.#filmPresenter.get(update.id).setAborting();
+        }
         break;
     }
-
     this.#uiBlocker.unblock();
   };
 
@@ -229,9 +212,7 @@ export default class MainPresenter {
   };
 
   init = () => {
-    this.#renderAllFilmsContainers();//render всех контейнеров для списка фильмов
-    this.#renderFilmsList(); //render самого списка фильмов
-    //this.#renderSortFilmsByRating(); //render 2-х самых рейтинговых фильмов
-    //this.#renderSortFilmsByComments(); //render 2-х самых комментируемых фильмво
+    this.#renderAllFilmsContainers();
+    this.#renderFilmsList();
   };
 }

@@ -4,10 +4,6 @@ import { FILTER_TYPE, USER_RATING, RATING_NUMBER } from './const';
 
 dayjs.extend(duration);
 
-const getRandomNumber = (max, min = 0) => Math.floor((Math.random() * (max - min) + min));
-const getRandomArrayItem = (array, min) => array[getRandomNumber(array.length, min)];
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
 const updateFilm = (films, update) => {
   const index = films.findIndex((film) => film.id === update.id);
 
@@ -55,6 +51,6 @@ const getUserRating = (filmsCount) => {
 };
 
 export {
-  getRandomNumber, getRandomArrayItem, months, updateFilm, compareRatings, compareDates, transformReleaseYear,
+  updateFilm, compareRatings, compareDates, transformReleaseYear,
   transformDuration, transformReleaseDate, filter, getUserRating
 };
