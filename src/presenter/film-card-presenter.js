@@ -1,4 +1,4 @@
-import { POPUP_MODE, UPDATE_TYPE, USER_ACTION } from '../const';
+import { POPUP_MODE, UPDATE_TYPE, USER_ACTION, SHAKE_CLASS_NAME, SHAKE_ANIMATION_TIMEOUT } from '../const';
 import { render, remove, replace } from '../framework/render';
 import FilmsCardView from '../view/film-card';
 import PopupContainerView from '../view/popup-container';
@@ -29,7 +29,6 @@ export default class FilmCardPresenter {
     const prevFilmElement = this.#filmElement;
     const prevPopUpElement = this.#popUpElement;
 
-
     this.#filmElement = new FilmsCardView(this.#film, this.#filmComments);
     this.#popUpElement = new PopupContainerView(this.#film, this.#filmComments, this.#commentsModel);
 
@@ -43,6 +42,7 @@ export default class FilmCardPresenter {
     this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
     this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
     this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
+    this.#popUpElement.setAddCommentCLickHandler(this.#addFilmCommentHandle);
 
     if (prevFilmElement === null || prevPopUpElement === null) {
       render(this.#filmElement, this.#filmListContainerElement);
@@ -68,8 +68,43 @@ export default class FilmCardPresenter {
   };
 
   resetView = () => {
-    if (this.#popupMode !== POPUP_MODE.CLOSED) {
+    if (this.#popupMode !== POPUP_MODE.CLOSED && document.body.contains(this.#popUpElement.element)) {
       this.#clickClosePopupHandler();
+    }
+  };
+
+  setSaving = () => {
+    this.#popUpElement.updateElement({
+      isDisabled: true,
+    });
+    this.#filmElement.updateElement({
+      isDisabled: true,
+    });
+  };
+
+  setDeleting = () => {
+    this.#popUpElement.updateElement({
+      isDisabled: true,
+    });
+  };
+
+  setAborting = () => {
+    const resetFilmState = () => {
+      this.#filmElement.updateElement({
+        isDisabled: false,
+      });
+    };
+
+    if (document.body.contains(this.#popUpElement.element)) {
+      this.#popUpElement.updateElement({
+        isDisabled: false,
+      });
+      document.querySelector('.film-details__inner').classList.add(SHAKE_CLASS_NAME);
+      setTimeout(() => {
+        document.querySelector('.film-details__inner').classList.remove(SHAKE_CLASS_NAME);
+      }, SHAKE_ANIMATION_TIMEOUT);
+    } else {
+      this.#filmElement.shake(resetFilmState);
     }
   };
 
@@ -85,17 +120,25 @@ export default class FilmCardPresenter {
     this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
     this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
     this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
+    this.#popUpElement.setAddCommentCLickHandler(this.#addFilmCommentHandle);
+
+    this.#popUpElement.updateElement({
+      isDisabled: false,
+    });
   };
 
   #clickClosePopupHandler = () => {
     this.#closePopupHandle();
     this.#popupMode = POPUP_MODE.CLOSED;
     document.removeEventListener('keydown', this.#onEscCloseHandle);
-    document.body.classList.remove('hide-overflow');
+    this.#filmElement.updateElement({
+      isDisabled: false,
+    });
   };
 
   #closePopupHandle = () => {
     remove(this.#popUpElement);
+    document.body.classList.remove('hide-overflow');
   };
 
   #onEscCloseHandle = (evt) => {
@@ -152,7 +195,7 @@ export default class FilmCardPresenter {
 
   #deleteFilmCommentHandle = (index) => {
     this.#changeFilm(
-      USER_ACTION.UPDATE_FILM,
+      USER_ACTION.DELETE_COMMENT,
       UPDATE_TYPE.PATCH,
       {
         ...this.#film,
@@ -160,6 +203,23 @@ export default class FilmCardPresenter {
           ...this.#film.comments.slice(0, index),
           ...this.#film.comments.slice(index + 1),
         ]
-      });
+      },
+      this.#filmComments[index],
+      index);
+  };
+
+  #addFilmCommentHandle = (addComment) => {
+    this.#changeFilm(
+      USER_ACTION.ADD_COMMENT,
+      UPDATE_TYPE.PATCH,
+      {
+        ...this.#film,
+        comments: [
+          ...this.#film.comments,
+          addComment.comment,
+        ]
+      },
+      addComment,
+    );
   };
 }

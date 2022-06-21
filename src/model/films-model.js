@@ -43,7 +43,7 @@ export default class FilmsModel extends Observable {
       ];
       this._notify(updateType, updatedFilm);
 
-    } catch(err) {
+    } catch (err) {
       throw new Error('Can\t update this film');
     }
   };
@@ -82,4 +82,3 @@ export default class FilmsModel extends Observable {
     return adaptedFilm;
   };
 }
-

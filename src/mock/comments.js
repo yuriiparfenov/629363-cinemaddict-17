@@ -1,3 +1,4 @@
+/*
 import { getRandomArrayItem, getRandomNumber } from '../utils';
 import { FILMS_COUNT } from '../const';
 
@@ -14,3 +15,4 @@ const generateComment = () => ({
 });
 
 export const generateComments = (count) => Array.from({ length: count }).map(() => generateComment());
+*/

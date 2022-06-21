@@ -15,7 +15,6 @@ const createProfileRatingTemplate = (filters) => {
 
 export default class ProfileRatingView extends AbstractView {
   #filters = null;
-  #filmsModel = null;
 
   constructor(filters) {
     super();

@@ -12,13 +12,13 @@ const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${elem.author}</span>
         <span class="film-details__comment-day">${transformReleaseDate(elem.date)}</span>
-        <button class="film-details__comment-delete" data-id=${elem.id}>Delete</button>
+        <button class="film-details__comment-delete ${elem.id}" data-id=${elem.id}>Delete</button>
       </p>
     </div>
   </li>
 `).join(' '));
 
-const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotion, textComment }, filmComments) => {
+const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotion, textComment, isDisabled }, filmComments) => {
   const { title, totalRating, writers, actors, release, runtime, poster, description, ageRating, alternativeTitle, director } = filmInfo;
   const commentsArray = filmComments;
 
@@ -89,9 +89,9 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotio
     </div>
 
     <section class="film-details__controls">
-      <button type="button" class="film-details__control-button film-details__control-button--watchlist ${userDetails.watchlist && 'film-details__control-button--active'}" id="watchlist" name="watchlist">Add to watchlist</button>
-      <button type="button" class="film-details__control-button film-details__control-button--watched ${userDetails.alreadyWatched && 'film-details__control-button--active'}" id="watched" name="watched">Already watched</button>
-      <button type="button" class="film-details__control-button film-details__control-button--favorite ${userDetails.favorite && 'film-details__control-button--active'}" id="favorite" name="favorite">Add to favorites</button>
+      <button type="button" class="film-details__control-button film-details__control-button--watchlist ${userDetails.watchlist && 'film-details__control-button--active'}" ${isDisabled ? 'disabled' : ''} id="watchlist" name="watchlist">Add to watchlist</button>
+      <button type="button" class="film-details__control-button film-details__control-button--watched ${userDetails.alreadyWatched && 'film-details__control-button--active'}" ${isDisabled ? 'disabled' : ''} id="watched" name="watched">Already watched</button>
+      <button type="button" class="film-details__control-button film-details__control-button--favorite ${userDetails.favorite && 'film-details__control-button--active'}" ${isDisabled ? 'disabled' : ''} id="favorite" name="favorite">Add to favorites</button>
     </section>
     </div>
 
@@ -107,10 +107,10 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotio
       <div class="film-details__add-emoji-label">${filmCommentEmotion ? `<img src="images/emoji/${filmCommentEmotion}.png" width="55" height="55" alt="emoji-smile">` : ''}</div>
 
       <label class="film-details__comment-label">
-        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${he.encode(textComment)}</textarea>
+        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${isDisabled ? 'disabled' : ''}>${he.encode(textComment)}</textarea>
       </label>
 
-      <div class="film-details__emoji-list">
+      <div class="film-details__emoji-list" ${isDisabled ? 'disabled' : ''}>
         <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile" ${filmCommentEmotion === 'smile' && 'checked'}>
         <label class="film-details__emoji-label" for="emoji-smile">
           <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
@@ -147,7 +147,7 @@ export default class PopupContainerView extends AbstractStatefulView {
     super();
     this.#filmComments = comments;
     this._state = PopupContainerView.parseFilmEmotionToState(film, comments);
-    this.#setCommentHandler();
+    this.setCommentHandler();
     this.#commentsModel = commentsModel;
   }
 
@@ -175,16 +175,41 @@ export default class PopupContainerView extends AbstractStatefulView {
     this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#addToWatchClickHandler);
   };
 
+  setDeleteCommentClickHandler = (callback) => {
+    this._callback.deleteCommentClick = callback;
+    const deleteButton = this.element.querySelectorAll('.film-details__comment-delete');
+    deleteButton.forEach((button) => button.addEventListener('click', this.#deleteCommentClickHandler));
+  };
+
+  setAddCommentCLickHandler = (callback) => {
+    this._callback.addCommentClick = callback;
+    this.element.querySelector('.film-details__comment-input').addEventListener('keydown', this.#addCommentHandler);
+  };
+
+  setCommentHandler = () => {
+    this.element.querySelector('.film-details__emoji-list').addEventListener('change', this.#filmCommentEmotionHandler);
+    this.element.querySelector('.film-details__comment-input').addEventListener('input', this.#filmInputCommentHandler);
+  };
+
   _restoreHandlers = () => {
-    this.#setCommentHandler();
+    this.setCommentHandler();
     this.setCloseClickHandler(this._callback.click);
     this.setFavoriteClickHandler(this._callback.favoriteClick);
     this.setHistoryClickHandler(this._callback.whatchedClick);
     this.setWhatchlistClickHandler(this._callback.addToWatchClick);
     this.setDeleteCommentClickHandler(this._callback.deleteCommentClick);
+    this.setAddCommentCLickHandler(this._callback.addCommentClick);
   };
 
-  static parseFilmEmotionToState = (film, comments) => ({ ...film, filmCommentEmotion: '', textComment: '', allComments: comments });
+  static parseFilmEmotionToState = (film, comments) => ({
+    ...film,
+    filmCommentEmotion: '',
+    textComment: '',
+    allComments: comments,
+    isDeletingComment: false,
+    isAddingComment: false,
+    isDisabled: false,
+  });
 
   static parseStateToFilm = (state) => {
     const film = { ...state };
@@ -193,25 +218,21 @@ export default class PopupContainerView extends AbstractStatefulView {
     return film;
   };
 
-  setDeleteCommentClickHandler = (callback) => {
-    this._callback.deleteCommentClick = callback;
-    const deleteButton = this.element.querySelectorAll('.film-details__comment-delete');
-    deleteButton.forEach((button) => button.addEventListener('click', this.#deleteCommentClickHandler));
-  };
-
   #deleteCommentClickHandler = (evt) => {
     evt.preventDefault();
     const commentId = Number(evt.target.dataset.id);
-    //this.#commentsModel.deleteComment(commentId);
-    const commentIndex = this._state.comments.findIndex((id) => id === commentId);
+    const commentIndex = this._state.comments.findIndex((id) => Number(id) === commentId);
     this._callback.deleteCommentClick(commentIndex);
+    this.updateElement({
+      isDeletingComment: true,
+    });
+    this.element.querySelector(`button[data-id='${commentId}']`).textContent = 'Deleting...';
   };
 
   #filmCommentEmotionHandler = (evt) => {
     evt.preventDefault();
-
     this.updateElement({
-      filmCommentEmotion: evt.target.value
+      filmCommentEmotion: evt.target.value,
     });
   };
 
@@ -222,9 +243,16 @@ export default class PopupContainerView extends AbstractStatefulView {
     });
   };
 
-  #setCommentHandler = () => {
-    this.element.querySelector('.film-details__emoji-list').addEventListener('change', this.#filmCommentEmotionHandler);
-    this.element.querySelector('.film-details__comment-input').addEventListener('input', this.#filmInputCommentHandler);
+  #addCommentHandler = (evt) => {
+    if ((evt.ctrlKey || evt.metaKey) && evt.keyCode === 13 && this._state.filmCommentEmotion) {
+      this._callback.addCommentClick({
+        comment: this._state.textComment,
+        emotion: this._state.filmCommentEmotion,
+      });
+      this.updateElement({
+        isAddingComment: true,
+      });
+    }
   };
 
   reset = (film) => {
@@ -239,15 +267,24 @@ export default class PopupContainerView extends AbstractStatefulView {
   #favoriteClickHandler = (evt) => {
     evt.stopPropagation();
     this._callback.favoriteClick();
+    this.updateElement({
+      isDisabled: true,
+    });
   };
 
   #whatchedClickHandler = (evt) => {
     evt.stopPropagation();
     this._callback.whatchedClick();
+    this.updateElement({
+      isDisabled: true,
+    });
   };
 
   #addToWatchClickHandler = (evt) => {
     evt.stopPropagation();
     this._callback.addToWatchClick();
+    this.updateElement({
+      isDisabled: true,
+    });
   };
 }
