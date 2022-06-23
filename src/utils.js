@@ -1,8 +1,13 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { FILTER_TYPE, USER_RATING, RATING_NUMBER } from './const';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { FilterType, UserRating, RatingNumber } from './const';
 
 dayjs.extend(duration);
+dayjs.extend(relativeTime);
+
+const getRandomNumber = (max, min = 0) => Math.floor((Math.random() * (max - min) + min));
+const getRandomItem = (array, min) => array[getRandomNumber(array.length, min)];
 
 const updateFilm = (films, update) => {
   const index = films.findIndex((film) => film.id === update.id);
@@ -20,31 +25,31 @@ const updateFilm = (films, update) => {
 
 const transformReleaseYear = (year) => dayjs(year).format('YYYY');
 const transformDuration = (min) => dayjs.duration(min, 'minutes').format('H[h] mm[m]');
-const transformReleaseDate = (date) => dayjs(date).format('DD MMMM YYYY');
+const transformReleaseDate = (date) => dayjs(date).fromNow();
 
 const compareRatings = (prevElem, nextElem) => nextElem.filmInfo.totalRating - prevElem.filmInfo.totalRating;
 const compareDates = (prevElem, nextElem) => dayjs(nextElem.filmInfo.release.date) - dayjs(prevElem.filmInfo.release.date);
 
 const filter = {
-  [FILTER_TYPE.ALL]: (films) => films,
-  [FILTER_TYPE.FAVORITE]: (films) => films.filter((film) => film.userDetails.favorite),
-  [FILTER_TYPE.HISTORY]: (films) => films.filter((film) => film.userDetails.alreadyWatched),
-  [FILTER_TYPE.WATCH_LIST]: (films) => films.filter((film) => film.userDetails.watchlist),
+  [FilterType.ALL]: (films) => films,
+  [FilterType.FAVORITE]: (films) => films.filter((film) => film.userDetails.favorite),
+  [FilterType.HISTORY]: (films) => films.filter((film) => film.userDetails.alreadyWatched),
+  [FilterType.WATCH_LIST]: (films) => films.filter((film) => film.userDetails.watchlist),
 };
 
 const getUserRating = (filmsCount) => {
   let userRating = '';
 
-  if (filmsCount >= RATING_NUMBER.ONE && filmsCount <= RATING_NUMBER.TEN) {
-    userRating = USER_RATING.NOVICE;
+  if (filmsCount >= RatingNumber.ONE && filmsCount <= RatingNumber.TEN) {
+    userRating = UserRating.NOVICE;
   }
 
-  if (filmsCount >= RATING_NUMBER.ELEVEN && filmsCount <= RATING_NUMBER.TWENTY) {
-    userRating = USER_RATING.FAN;
+  if (filmsCount >= RatingNumber.ELEVEN && filmsCount <= RatingNumber.TWENTY) {
+    userRating = UserRating.FAN;
   }
 
-  if (filmsCount >= RATING_NUMBER.TWENTY_ONE) {
-    userRating = USER_RATING.MOVIE_BUFF;
+  if (filmsCount >= RatingNumber.TWENTY_ONE) {
+    userRating = UserRating.MOVIE_BUFF;
   }
 
   return userRating;
@@ -52,5 +57,6 @@ const getUserRating = (filmsCount) => {
 
 export {
   updateFilm, compareRatings, compareDates, transformReleaseYear,
-  transformDuration, transformReleaseDate, filter, getUserRating
+  transformDuration, transformReleaseDate, filter, getUserRating,
+  getRandomItem
 };

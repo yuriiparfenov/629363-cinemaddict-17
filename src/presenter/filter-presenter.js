@@ -1,10 +1,10 @@
-import { FILTER_TYPE, FILTER_NAME, UPDATE_TYPE } from '../const';
+import { FilterType, FilterName, UpdateType } from '../const';
 import { filter } from '../utils';
 import { remove, render, replace } from '../framework/render';
 import ProfileRatingView from '../view/profile-rating';
 import NavigationView from '../view/navigation';
 
-export default class FilterPresentor {
+export default class FilterPresenter {
   #filterModel = null;
   #filmsModel = null;
   #filterContainer = null;
@@ -20,33 +20,29 @@ export default class FilterPresentor {
     this.#filmsModel.addObserver(this.#handleEventModel);
   }
 
-  #handleEventModel = () => {
-    this.init();
-  };
-
   get filters() {
     const films = this.#filmsModel.films;
 
     return [
       {
-        type: FILTER_TYPE.ALL,
-        name: FILTER_NAME.all,
-        filmsCount: filter[FILTER_TYPE.ALL](films).length,
+        type: FilterType.ALL,
+        name: FilterName.all,
+        filmsCount: filter[FilterType.ALL](films).length,
       },
       {
-        type: FILTER_TYPE.FAVORITE,
-        name: FILTER_NAME.favorite,
-        filmsCount: filter[FILTER_TYPE.FAVORITE](films).length,
+        type: FilterType.FAVORITE,
+        name: FilterName.favorite,
+        filmsCount: filter[FilterType.FAVORITE](films).length,
       },
       {
-        type: FILTER_TYPE.HISTORY,
-        name: FILTER_NAME.history,
-        filmsCount: filter[FILTER_TYPE.HISTORY](films).length,
+        type: FilterType.HISTORY,
+        name: FilterName.history,
+        filmsCount: filter[FilterType.HISTORY](films).length,
       },
       {
-        type: FILTER_TYPE.WATCH_LIST,
-        name: FILTER_NAME.watchlist,
-        filmsCount: filter[FILTER_TYPE.WATCH_LIST](films).length,
+        type: FilterType.WATCH_LIST,
+        name: FilterName.watchlist,
+        filmsCount: filter[FilterType.WATCH_LIST](films).length,
       }
     ];
   }
@@ -73,11 +69,15 @@ export default class FilterPresentor {
     remove(prevRatingElement);
   };
 
+  #handleEventModel = () => {
+    this.init();
+  };
+
   #handleFilterChange = (filterType) => {
     if (this.#filmsModel.filter === filterType) {
       return;
     }
 
-    this.#filterModel.setFilter(UPDATE_TYPE.MAJOR, filterType);
+    this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
   };
 }

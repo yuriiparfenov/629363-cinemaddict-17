@@ -1,9 +1,9 @@
 import AbstractView from '../framework/view/abstract-view';
-import { FILTER_TYPE  } from '../const';
+import { FilterType  } from '../const';
 import { getUserRating } from '../utils';
 
 const createProfileRatingTemplate = (filters) => {
-  const { filmsCount } = filters.find((elem) => elem.type === FILTER_TYPE.HISTORY);
+  const { filmsCount } = filters.find((elem) => elem.type === FilterType.HISTORY);
   const userRating = getUserRating(filmsCount);
 
   return (

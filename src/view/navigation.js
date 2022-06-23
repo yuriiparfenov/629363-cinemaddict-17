@@ -1,4 +1,4 @@
-import { FILTER_NAME } from '../const';
+import { FilterName } from '../const';
 import AbstractView from '../framework/view/abstract-view';
 
 const createFilterItemTemplate = (filter, currentFilterType) => {
@@ -6,7 +6,7 @@ const createFilterItemTemplate = (filter, currentFilterType) => {
   return (
     `<a href="#${type}" 
     class="main-navigation__item ${type === currentFilterType ? 'main-navigation__item--active' : ''}" data-filter-type=${type}>
-    ${name === FILTER_NAME.all ? name : `${name} <span class="main-navigation__item-count">${filmsCount}</span>`}
+    ${name === FilterName.all ? name : `${name} <span class="main-navigation__item-count" data-filter-type=${type}>${filmsCount}</span>`}
     </a>`
   );
 };
@@ -32,12 +32,13 @@ export default class NavigationView extends AbstractView {
 
   setFilterChangeHandler = (callback) => {
     this._callback.filterChange = callback;
-    const filtersLinks = this.element.querySelectorAll('.main-navigation__item');
-    filtersLinks.forEach((filterLink) => filterLink.addEventListener('click', this.#filterTypeChange));
+    this.element.addEventListener('click', this.#filterTypeChange);
   };
 
   #filterTypeChange = (evt) => {
-    evt.preventDefault();
-    this._callback.filterChange(evt.target.dataset.filter);
+    if(evt.target.tagName === 'A' || evt.target.tagName === 'SPAN') {
+      evt.preventDefault();
+      this._callback.filterChange(evt.target.dataset.filterType);
+    }
   };
 }

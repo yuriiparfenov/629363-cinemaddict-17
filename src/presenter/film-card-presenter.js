@@ -1,5 +1,6 @@
-import { POPUP_MODE, UPDATE_TYPE, USER_ACTION, SHAKE_CLASS_NAME, SHAKE_ANIMATION_TIMEOUT } from '../const';
+import { PopupMode, UpdateType, UserAction, SHAKE_CLASS_NAME, SHAKE_ANIMATION_TIMEOUT } from '../const';
 import { render, remove, replace } from '../framework/render';
+import { getRandomItem } from '../utils';
 import FilmsCardView from '../view/film-card';
 import PopupContainerView from '../view/popup-container';
 
@@ -10,9 +11,10 @@ export default class FilmCardPresenter {
   #popUpElement = null;
   #changeFilm = null;
   #changeMode = null;
-  #popupMode = POPUP_MODE.CLOSED;
+  #popupMode = PopupMode.CLOSED;
   #filmComments = null;
   #commentsModel = null;
+  #randomGenre = null;
 
   constructor(filmListContainerElement, changeFilm, changeMode, commentsModel) {
     this.#filmListContainerElement = filmListContainerElement;
@@ -21,41 +23,40 @@ export default class FilmCardPresenter {
     this.#commentsModel = commentsModel;
   }
 
-  init = async (film) => {
+  init = (film) => {
     this.#film = film;
-    await this.#commentsModel.init(this.#film);
-    this.#filmComments = this.#commentsModel.comments;
+    this.#randomGenre = getRandomItem(this.#film.filmInfo.genre);
+    const prevPopupComments = this.#commentsModel.comments || [];
 
     const prevFilmElement = this.#filmElement;
     const prevPopUpElement = this.#popUpElement;
 
-    this.#filmElement = new FilmsCardView(this.#film, this.#filmComments);
-    this.#popUpElement = new PopupContainerView(this.#film, this.#filmComments, this.#commentsModel);
+    this.#filmElement = new FilmsCardView(this.#film, this.#randomGenre);
+    this.#popUpElement = new PopupContainerView(this.#film, prevPopupComments, this.#commentsModel, this.#randomGenre);
 
     this.#filmElement.setClickHandler(this.#clickOpenPopUpHandler);
     this.#filmElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
     this.#filmElement.setHistoryClickHandler(this.#whatchedFilmHandle);
     this.#filmElement.setWhatchlistClickHandler(this.#addWatchListHandle);
 
-    this.#popUpElement.setCloseClickHandler(this.#clickClosePopupHandler);
-    this.#popUpElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
-    this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
-    this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
-    this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
-    this.#popUpElement.setAddCommentCLickHandler(this.#addFilmCommentHandle);
-
     if (prevFilmElement === null || prevPopUpElement === null) {
       render(this.#filmElement, this.#filmListContainerElement);
       return;
     }
 
-    if (this.#popupMode === POPUP_MODE.CLOSED) {
+    if (this.#popupMode === PopupMode.CLOSED) {
       replace(this.#filmElement, prevFilmElement);
     }
 
-    if (this.#popupMode === POPUP_MODE.OPEN) {
-      replace(this.#filmElement, prevFilmElement);
+    if (this.#popupMode === PopupMode.OPEN) {
       replace(this.#popUpElement, prevPopUpElement);
+      replace(this.#filmElement, prevFilmElement);
+      this.#popUpElement.setCloseClickHandler(this.#clickClosePopupHandler);
+      this.#popUpElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
+      this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
+      this.#popUpElement.setWhatchlistClickHandler(this.#addWatchListHandle);
+      this.#popUpElement.setDeleteCommentClickHandler(this.#deleteFilmCommentHandle);
+      this.#popUpElement.setAddCommentCLickHandler(this.#addFilmCommentHandle);
     }
 
     remove(prevFilmElement);
@@ -68,8 +69,9 @@ export default class FilmCardPresenter {
   };
 
   resetView = () => {
-    if (this.#popupMode !== POPUP_MODE.CLOSED && document.body.contains(this.#popUpElement.element)) {
+    if (this.#popupMode !== PopupMode.CLOSED && document.body.contains(this.#popUpElement.element)) {
       this.#clickClosePopupHandler();
+      this.#popUpElement.reset(this.#film);
     }
   };
 
@@ -108,13 +110,20 @@ export default class FilmCardPresenter {
     }
   };
 
-  #clickOpenPopUpHandler = () => {
+  #clickOpenPopUpHandler = async () => {
+    if (this.#popupMode === PopupMode.OPEN) {
+      return;
+    }
+
     this.#changeMode();
-    this.#showPopupHandle();
-    this.#popupMode = POPUP_MODE.OPEN;
+    await this.#commentsModel.init(this.#film);
+    this.#filmComments = this.#commentsModel.comments;
+    this.#popupMode = PopupMode.OPEN;
     document.body.classList.add('hide-overflow');
     document.addEventListener('keydown', this.#onEscCloseHandle);
 
+    this.#popUpElement = new PopupContainerView(this.#film, this.#filmComments, this.#commentsModel, this.#randomGenre);
+    this.#showPopupHandle();
     this.#popUpElement.setCloseClickHandler(this.#clickClosePopupHandler);
     this.#popUpElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
     this.#popUpElement.setHistoryClickHandler(this.#whatchedFilmHandle);
@@ -129,7 +138,7 @@ export default class FilmCardPresenter {
 
   #clickClosePopupHandler = () => {
     this.#closePopupHandle();
-    this.#popupMode = POPUP_MODE.CLOSED;
+    this.#popupMode = PopupMode.CLOSED;
     document.removeEventListener('keydown', this.#onEscCloseHandle);
     this.#filmElement.updateElement({
       isDisabled: false,
@@ -156,8 +165,8 @@ export default class FilmCardPresenter {
 
   #favoriteFilmHandle = () => {
     this.#changeFilm(
-      USER_ACTION.UPDATE_FILM,
-      this.#popupMode === POPUP_MODE.OPEN ? UPDATE_TYPE.PATCH : UPDATE_TYPE.MINOR,
+      UserAction.UPDATE_FILM,
+      this.#popupMode === PopupMode.OPEN ? UpdateType.PATCH : UpdateType.MINOR,
       {
         ...this.#film,
         userDetails: {
@@ -169,8 +178,8 @@ export default class FilmCardPresenter {
 
   #whatchedFilmHandle = () => {
     this.#changeFilm(
-      USER_ACTION.UPDATE_FILM,
-      this.#popupMode === POPUP_MODE.OPEN ? UPDATE_TYPE.PATCH : UPDATE_TYPE.MINOR,
+      UserAction.UPDATE_FILM,
+      this.#popupMode === PopupMode.OPEN ? UpdateType.PATCH : UpdateType.MINOR,
       {
         ...this.#film,
         userDetails: {
@@ -182,8 +191,8 @@ export default class FilmCardPresenter {
 
   #addWatchListHandle = () => {
     this.#changeFilm(
-      USER_ACTION.UPDATE_FILM,
-      this.#popupMode === POPUP_MODE.OPEN ? UPDATE_TYPE.PATCH : UPDATE_TYPE.MINOR,
+      UserAction.UPDATE_FILM,
+      this.#popupMode === PopupMode.OPEN ? UpdateType.PATCH : UpdateType.MINOR,
       {
         ...this.#film,
         userDetails: {
@@ -195,8 +204,8 @@ export default class FilmCardPresenter {
 
   #deleteFilmCommentHandle = (index) => {
     this.#changeFilm(
-      USER_ACTION.DELETE_COMMENT,
-      UPDATE_TYPE.PATCH,
+      UserAction.DELETE_COMMENT,
+      UpdateType.PATCH,
       {
         ...this.#film,
         comments: [
@@ -210,14 +219,10 @@ export default class FilmCardPresenter {
 
   #addFilmCommentHandle = (addComment) => {
     this.#changeFilm(
-      USER_ACTION.ADD_COMMENT,
-      UPDATE_TYPE.PATCH,
+      UserAction.ADD_COMMENT,
+      UpdateType.PATCH,
       {
         ...this.#film,
-        comments: [
-          ...this.#film.comments,
-          addComment.comment,
-        ]
       },
       addComment,
     );

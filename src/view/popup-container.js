@@ -2,7 +2,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import he from 'he';
 import { transformDuration, transformReleaseDate } from '../utils';
 
-const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
+const renderFilmComment = (comments) => (comments.map((elem) => `
   <li class="film-details__comment">
     <span class="film-details__comment-emoji">
       <img src="./images/emoji/${elem.emotion}.png" width="55" height="55" alt="emoji-smile">
@@ -18,9 +18,9 @@ const renderFilmComment = (commentsArray) => (commentsArray.map((elem) => `
   </li>
 `).join(' '));
 
-const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotion, textComment, isDisabled }, filmComments) => {
+const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotion, textComment, isDisabled, comments, randomGenre }, filmComments) => {
   const { title, totalRating, writers, actors, release, runtime, poster, description, ageRating, alternativeTitle, director } = filmInfo;
-  const commentsArray = filmComments;
+  const filmPopupComments = filmComments;
 
   return (
     `<section class="film-details">
@@ -76,9 +76,7 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotio
           <tr class="film-details__row">
             <td class="film-details__term">Genres</td>
             <td class="film-details__cell">
-              <span class="film-details__genre">Drama</span>
-              <span class="film-details__genre">Film-Noir</span>
-              <span class="film-details__genre">Mystery</span></td>
+              <span class="film-details__genre">${randomGenre}</span>
           </tr>
         </table>
 
@@ -97,10 +95,10 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotio
 
     <div class="film-details__bottom-container">
   <section class="film-details__comments-wrap">
-    <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsArray.length}</span></h3>
+    <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
     <ul class="film-details__comments-list">
-      ${renderFilmComment(commentsArray)}
+      ${renderFilmComment(filmPopupComments)}
     </ul>
 
     <div class="film-details__new-comment">
@@ -142,11 +140,12 @@ const createPopupContainerTemplate = ({ filmInfo, userDetails, filmCommentEmotio
 export default class PopupContainerView extends AbstractStatefulView {
   #filmComments = null;
   #commentsModel = null;
+  #randomGenre = null;
 
-  constructor(film, comments, commentsModel) {
+  constructor(film, comments, commentsModel, randomGenre) {
     super();
     this.#filmComments = comments;
-    this._state = PopupContainerView.parseFilmEmotionToState(film, comments);
+    this._state = PopupContainerView.parseFilmEmotionToState(film, comments, randomGenre);
     this.setCommentHandler();
     this.#commentsModel = commentsModel;
   }
@@ -201,26 +200,14 @@ export default class PopupContainerView extends AbstractStatefulView {
     this.setAddCommentCLickHandler(this._callback.addCommentClick);
   };
 
-  static parseFilmEmotionToState = (film, comments) => ({
-    ...film,
-    filmCommentEmotion: '',
-    textComment: '',
-    allComments: comments,
-    isDeletingComment: false,
-    isAddingComment: false,
-    isDisabled: false,
-  });
-
-  static parseStateToFilm = (state) => {
-    const film = { ...state };
-    this.#filmComments = this._state.allComments;
-
-    return film;
+  reset = (film) => {
+    this.updateElement(PopupContainerView.parseFilmEmotionToState(film));
   };
 
   #deleteCommentClickHandler = (evt) => {
     evt.preventDefault();
     const commentId = Number(evt.target.dataset.id);
+    //console.log('this._state delete com', this._state);
     const commentIndex = this._state.comments.findIndex((id) => Number(id) === commentId);
     this._callback.deleteCommentClick(commentIndex);
     this.updateElement({
@@ -251,12 +238,13 @@ export default class PopupContainerView extends AbstractStatefulView {
       });
       this.updateElement({
         isAddingComment: true,
+        comments: [
+          ...this._state.allComments,
+          this._state.textComment,
+        ]
       });
+      //console.log('this._state add com', this._state);
     }
-  };
-
-  reset = (film) => {
-    this.updateElement(PopupContainerView.parseFilmEmotionToState(film));
   };
 
   #clickHandler = (evt) => {
@@ -265,7 +253,7 @@ export default class PopupContainerView extends AbstractStatefulView {
   };
 
   #favoriteClickHandler = (evt) => {
-    evt.stopPropagation();
+    evt.preventDefault();
     this._callback.favoriteClick();
     this.updateElement({
       isDisabled: true,
@@ -273,7 +261,7 @@ export default class PopupContainerView extends AbstractStatefulView {
   };
 
   #whatchedClickHandler = (evt) => {
-    evt.stopPropagation();
+    evt.preventDefault();
     this._callback.whatchedClick();
     this.updateElement({
       isDisabled: true,
@@ -281,10 +269,37 @@ export default class PopupContainerView extends AbstractStatefulView {
   };
 
   #addToWatchClickHandler = (evt) => {
-    evt.stopPropagation();
+    evt.preventDefault();
     this._callback.addToWatchClick();
     this.updateElement({
       isDisabled: true,
     });
+    this.reset();
+  };
+
+  static parseFilmEmotionToState = (film, comments, randomGenre) => ({
+    ...film,
+    filmCommentEmotion: '',
+    textComment: '',
+    allComments: comments,
+    isDeletingComment: false,
+    isAddingComment: false,
+    isDisabled: false,
+    randomGenre: randomGenre,
+  });
+
+  static parseStateToFilm = (state) => {
+    const film = { ...state };
+    //this.#filmComments = this._state.allComments;
+
+    delete film.filmCommentEmotion;
+    delete film.allComments;
+    delete film.isAddingComment;
+    delete film.isDeletingComment;
+    delete film.isDisabled;
+    delete film.randomGenre;
+
+    return film;
   };
 }
+

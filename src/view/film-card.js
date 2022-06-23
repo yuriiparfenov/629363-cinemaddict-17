@@ -1,10 +1,10 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import { transformReleaseYear, transformDuration } from '../utils';
 
-const createFilmsCardTemplate = (state, film, filmComments) => {
-  const { title, totalRating, release, runtime, genre, poster, description } = film.filmInfo;
+const createFilmsCardTemplate = (state, film, randomGenre) => {
+  const { title, totalRating, release, runtime, poster, description } = film.filmInfo;
   const { watchlist, alreadyWatched, favorite } = film.userDetails;
-  const commentsArray = filmComments;
+  const comments = film.comments;
   const { isDisabled } = state;
   return (
     `<article class="film-card">
@@ -14,11 +14,11 @@ const createFilmsCardTemplate = (state, film, filmComments) => {
           <p class="film-card__info">
             <span class="film-card__year">${transformReleaseYear(release.date)}</span>
             <span class="film-card__duration">${transformDuration(runtime)}</span>
-            <span class="film-card__genre">${genre}</span>
+            <span class="film-card__genre">${randomGenre}</span>
           </p>
           <img src="./${poster}" alt="${title}" class="film-card__poster">
           <p class="film-card__description">${description.length > 140 ? `${description.substr(0, 139)}...` : description}</p>
-          <span class="film-card__comments">${commentsArray.length} comments</span>
+          <span class="film-card__comments">${comments.length} comments</span>
         </a>
         <div class="film-card__controls">
           <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${watchlist && 'film-card__controls-item--active'}" type="button" ${isDisabled ? 'disabled' : ''}>Add to watchlist</button>
@@ -30,19 +30,18 @@ const createFilmsCardTemplate = (state, film, filmComments) => {
 
 export default class FilmsCardView extends AbstractStatefulView {
   #film = null;
-  #filmComments = null;
+  #randomGenre = null;
 
-  constructor(film, filmComments) {
+  constructor(film, randomGenre) {
     super();
     this.#film = film;
-    this.#filmComments = filmComments;
+    this.#randomGenre = randomGenre;
     this._state = FilmsCardView.parseFilmToState(film);
   }
 
-  static parseFilmToState = (film) => ({
-    ...film,
-    isDisabled: false,
-  });
+  get template() {
+    return createFilmsCardTemplate(this._state, this.#film, this.#randomGenre);
+  }
 
   _restoreHandlers = () => {
     this.setClickHandler(this._callback.click);
@@ -50,10 +49,6 @@ export default class FilmsCardView extends AbstractStatefulView {
     this.setHistoryClickHandler(this._callback.whatchedClick);
     this.setWhatchlistClickHandler(this._callback.addToWatchClick);
   };
-
-  get template() {
-    return createFilmsCardTemplate(this._state, this.#film, this.#filmComments);
-  }
 
   setClickHandler = (callback) => {
     this._callback.click = callback;
@@ -103,4 +98,9 @@ export default class FilmsCardView extends AbstractStatefulView {
       isDisabled: true,
     });
   };
+
+  static parseFilmToState = (film) => ({
+    ...film,
+    isDisabled: false,
+  });
 }

@@ -1,15 +1,15 @@
-import { METHOD, URL_LINK } from '../const';
+import { Method, UrlLink } from '../const';
 import ApiService from '../framework/api-service';
 
 export default class FilmsApiService extends ApiService {
   get films() {
-    return this._load({ url: URL_LINK.MOVIES }).then(ApiService.parseResponse);
+    return this._load({ url: UrlLink.MOVIES }).then(ApiService.parseResponse);
   }
 
   updateFilm = async (film) => {
     const response = await this._load({
-      url: `${URL_LINK.MOVIES}/${film.id}`,
-      method: METHOD.PUT,
+      url: `${UrlLink.MOVIES}/${film.id}`,
+      method: Method.PUT,
       body: JSON.stringify(this.#adaptToServer(film)),
       headers: new Headers({ 'Content-Type': 'application/json' }),
     });

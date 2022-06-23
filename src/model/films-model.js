@@ -1,4 +1,4 @@
-import { UPDATE_TYPE } from '../const';
+import { UpdateType } from '../const';
 import Observable from '../framework/observable';
 
 export default class FilmsModel extends Observable {
@@ -18,7 +18,7 @@ export default class FilmsModel extends Observable {
       this.films = [];
     }
 
-    this._notify(UPDATE_TYPE.INIT);
+    this._notify(UpdateType.INIT);
   };
 
   get films() {
