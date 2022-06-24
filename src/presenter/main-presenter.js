@@ -193,7 +193,7 @@ export default class MainPresenter {
     }
   };
 
-  #handleViewChangeByAction = async (actionType, updateType, update, comment, commentIndex) => {
+  #handleViewChangeByAction = async (actionType, updateType, update) => {
     this.#uiBlocker.block();
     switch (actionType) {
       case UserAction.UPDATE_FILM:
@@ -207,7 +207,7 @@ export default class MainPresenter {
       case UserAction.ADD_COMMENT:
         this.#filmPresenter.get(update.id).setSaving();
         try {
-          await this.#commentsModel.addComment(updateType, update, comment);
+          await this.#filmsModel.updateFilm(updateType, update);
         } catch (err) {
           this.#filmPresenter.get(update.id).setAborting();
         }
@@ -215,7 +215,7 @@ export default class MainPresenter {
       case UserAction.DELETE_COMMENT:
         this.#filmPresenter.get(update.id).setDeleting();
         try {
-          await this.#commentsModel.deleteComment(updateType, update, comment, commentIndex);
+          await this.#filmsModel.updateFilm(updateType, update);
         } catch (err) {
           this.#filmPresenter.get(update.id).setAborting();
         }

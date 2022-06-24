@@ -32,20 +32,20 @@ export default class CommentsModel extends Observable {
       const parsedResponse = await ApiService.parseResponse(response);
 
       this.#comments = [...parsedResponse.comments];
-      this._notify(updateType, update);
+      this._notify(updateType, update); //update
 
     } catch (err) {
       throw new Error('Cant\'t add this comment');
     }
   };
 
-  deleteComment = async (updateType, update, commentToDelete, indexOfComment) => {
+  deleteComment = async (updateType, update, commentId, indexOfComment) => {
     if (indexOfComment === -1) {
       throw new Error('Can\'t delete comment');
     }
 
     try {
-      await this.#commentsApiService.deleteComment(commentToDelete.id);
+      await this.#commentsApiService.deleteComment(commentId);
       this.#comments = [
         ...this.#comments.slice(0, indexOfComment),
         ...this.#comments.slice(indexOfComment + 1),

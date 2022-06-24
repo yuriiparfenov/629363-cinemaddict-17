@@ -32,7 +32,7 @@ export default class FilmCardPresenter {
     const prevPopUpElement = this.#popUpElement;
 
     this.#filmElement = new FilmsCardView(this.#film, this.#randomGenre);
-    this.#popUpElement = new PopupContainerView(this.#film, prevPopupComments, this.#commentsModel, this.#randomGenre);
+    this.#popUpElement = new PopupContainerView(this.#film, prevPopupComments, this.#randomGenre);
 
     this.#filmElement.setClickHandler(this.#clickOpenPopUpHandler);
     this.#filmElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
@@ -88,6 +88,8 @@ export default class FilmCardPresenter {
     this.#popUpElement.updateElement({
       isDisabled: true,
     });
+
+    render(this.#popUpElement, document.body);
   };
 
   setAborting = () => {
@@ -108,6 +110,8 @@ export default class FilmCardPresenter {
     } else {
       this.#filmElement.shake(resetFilmState);
     }
+
+    render(this.#popUpElement, document.body);
   };
 
   #clickOpenPopUpHandler = async () => {
@@ -122,7 +126,7 @@ export default class FilmCardPresenter {
     document.body.classList.add('hide-overflow');
     document.addEventListener('keydown', this.#onEscCloseHandle);
 
-    this.#popUpElement = new PopupContainerView(this.#film, this.#filmComments, this.#commentsModel, this.#randomGenre);
+    this.#popUpElement = new PopupContainerView(this.#film, this.#filmComments, this.#randomGenre);
     this.#showPopupHandle();
     this.#popUpElement.setCloseClickHandler(this.#clickClosePopupHandler);
     this.#popUpElement.setFavoriteClickHandler(this.#favoriteFilmHandle);
@@ -202,7 +206,8 @@ export default class FilmCardPresenter {
       });
   };
 
-  #deleteFilmCommentHandle = (index) => {
+  #deleteFilmCommentHandle = async (index, commentId) => {
+    await this.#commentsModel.deleteComment(UpdateType.PATCH, this.#film, commentId, index);
     this.#changeFilm(
       UserAction.DELETE_COMMENT,
       UpdateType.PATCH,
@@ -213,18 +218,23 @@ export default class FilmCardPresenter {
           ...this.#film.comments.slice(index + 1),
         ]
       },
-      this.#filmComments[index],
-      index);
+    );
   };
 
-  #addFilmCommentHandle = (addComment) => {
+  #addFilmCommentHandle = async (addComment) => {
+    await this.#commentsModel.addComment(UpdateType.PATCH, this.#film, addComment);
+    const commentedFilm = this.#commentsModel.comments;
+    const newFilmsComment = [];
+    commentedFilm.forEach((item) => newFilmsComment.push(item.id));
     this.#changeFilm(
       UserAction.ADD_COMMENT,
-      UpdateType.PATCH,
+      this.#popupMode === PopupMode.OPEN ? UpdateType.PATCH : UpdateType.MINOR,
       {
         ...this.#film,
+        comments: [
+          ...newFilmsComment,
+        ]
       },
-      addComment,
     );
   };
 }
